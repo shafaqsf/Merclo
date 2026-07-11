@@ -6,6 +6,7 @@
  * runtime / route handlers).
  */
 import { createAdminSupabase } from "@/lib/supabase/admin";
+import { createServerSupabase } from "@/lib/supabase/server";
 
 /**
  * A single item in a conversation's history. This is an OpenAI Agents SDK item
@@ -45,6 +46,96 @@ export function mapRowToConversation(
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
+}
+
+/** Lightweight conversation summary for list/analytics views (no messages). */
+export interface ConversationSummary {
+  id: string;
+  bot_id: string;
+  status: ConversationStatus;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Count assistant tool-call requests within a message history. Pure. */
+export function countToolCalls(messages: ConversationMessage[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const raw of messages) {
+    if (!raw || typeof raw !== "object") continue;
+    const msg = raw as { tool_calls?: unknown };
+    if (!Array.isArray(msg.tool_calls)) continue;
+    for (const call of msg.tool_calls) {
+      const name =
+        call && typeof call === "object"
+          ? ((call as { function?: { name?: string } }).function?.name ??
+            (call as { name?: string }).name)
+          : undefined;
+      if (typeof name === "string") counts[name] = (counts[name] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
+function toSummary(c: Conversation): ConversationSummary {
+  return {
+    id: c.id,
+    bot_id: c.bot_id,
+    status: c.status,
+    message_count: c.messages.length,
+    created_at: c.created_at,
+    updated_at: c.updated_at,
+  };
+}
+
+/**
+ * List conversation summaries for every bot owned by the signed-in merchant.
+ * Uses the cookie-bound client, so RLS scopes rows to the owner (see the
+ * "owners read their bots' conversations" policy).
+ */
+export async function listConversationsForOwner(): Promise<ConversationSummary[]> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("conversations")
+    .select(CONVERSATION_COLUMNS)
+    .order("updated_at", { ascending: false });
+
+  if (error) throw new Error(`Failed to list conversations: ${error.message}`);
+  return (data ?? [])
+    .map((row) => mapRowToConversation(row as Record<string, unknown>))
+    .map(toSummary);
+}
+
+/** Full conversations (with messages) for the owner — for analytics scans. */
+export async function listConversationsWithMessagesForOwner(): Promise<Conversation[]> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("conversations")
+    .select(CONVERSATION_COLUMNS)
+    .order("updated_at", { ascending: false });
+
+  if (error) throw new Error(`Failed to list conversations: ${error.message}`);
+  return (data ?? []).map((row) =>
+    mapRowToConversation(row as Record<string, unknown>)
+  );
+}
+
+/**
+ * Load a single conversation the signed-in merchant owns (full transcript).
+ * Returns null if it doesn't exist or isn't visible to this user (RLS).
+ */
+export async function getConversationForOwner(
+  id: string
+): Promise<Conversation | null> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("conversations")
+    .select(CONVERSATION_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to load conversation: ${error.message}`);
+  return data ? mapRowToConversation(data as Record<string, unknown>) : null;
 }
 
 export async function createConversation(botId: string): Promise<Conversation> {
