@@ -17,6 +17,7 @@ function makeBot(overrides: Partial<Bot> = {}): Bot {
     persona: "You are a friendly test assistant.",
     allowed_tools: ["get_page_context", "search_products", "add_to_cart"],
     allowed_origins: [],
+    appearance: {},
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
     ...overrides,
@@ -192,12 +193,12 @@ describe("runAgentStep state machine", () => {
     }
   });
 
-  it("passes no tools through when the bot allows none", async () => {
+  it("offers only the server-side search_knowledge tool when the bot allows none", async () => {
     const llm = scriptedLLM([{ content: "Hello!", toolCalls: [] }]);
-    let seenTools = -1;
+    let seenNames: string[] = [];
     const spy: LLM = {
       async complete(req) {
-        seenTools = req.tools.length;
+        seenNames = req.tools.map((t) => t.function.name);
         return llm.complete(req);
       },
     };
@@ -207,7 +208,36 @@ describe("runAgentStep state machine", () => {
       turn: { kind: "user", userMessage: "hi" },
       llm: spy,
     });
-    expect(seenTools).toBe(0);
+    // No storefront tools, but search_knowledge is always available.
+    expect(seenNames).toEqual(["search_knowledge"]);
+  });
+
+  it("runs search_knowledge server-side and loops to a final answer", async () => {
+    const llm = scriptedLLM([
+      {
+        content: null,
+        toolCalls: [
+          { id: "k1", name: "search_knowledge", arguments: JSON.stringify({ query: "returns" }) },
+        ],
+      },
+      { content: "Our return window is 30 days.", toolCalls: [] },
+    ]);
+    let executed = 0;
+    const result = await runAgentStep({
+      bot: makeBot({ allowed_tools: [] }),
+      priorMessages: [],
+      turn: { kind: "user", userMessage: "what's your return policy?" },
+      llm,
+      serverTools: async () => {
+        executed += 1;
+        return { results: [{ title: "Returns", content: "30 days", kind: "policy" }] };
+      },
+    });
+    // The server executed the knowledge tool inline (no client round-trip).
+    expect(executed).toBe(1);
+    expect(result.type).toBe("message");
+    if (result.type !== "message") throw new Error("unreachable");
+    expect(result.content).toBe("Our return window is 30 days.");
   });
 });
 

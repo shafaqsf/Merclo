@@ -9,6 +9,12 @@ import {
   countToolCalls,
   type Conversation,
 } from "@/lib/db/conversations";
+import { createServerSupabase } from "@/lib/supabase/server";
+
+export interface FeedbackTotals {
+  up: number;
+  down: number;
+}
 
 export interface DashboardStats {
   botCount: number;
@@ -21,6 +27,32 @@ export interface DashboardStats {
   toolUsage: { name: string; count: number }[];
   /** Conversation count per bot, most-active first. */
   perBot: { botId: string; name: string; conversationCount: number }[];
+  /** Most common opening questions, most-frequent first. */
+  topQuestions: { question: string; count: number }[];
+  /** add_to_cart tool calls attributed to bots. */
+  cartAdds: number;
+  /** Thumbs up/down totals + score (up / (up+down)), 0..1 or null if no votes. */
+  csat: { up: number; down: number; score: number | null };
+  /** Previous-7-day totals for delta display. */
+  prev: { conversationCount: number; messageCount: number };
+}
+
+/** Normalize a question string for counting (lowercase, collapse space, cap). */
+function normalizeQuestion(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, " ").slice(0, 120);
+}
+
+/** First user message content of a conversation, if any. Pure. */
+function firstUserQuestion(c: Conversation): string | null {
+  for (const raw of c.messages) {
+    if (raw && typeof raw === "object") {
+      const m = raw as { role?: unknown; content?: unknown };
+      if (m.role === "user" && typeof m.content === "string" && m.content.trim()) {
+        return m.content;
+      }
+    }
+  }
+  return null;
 }
 
 /** UTC date key (YYYY-MM-DD) for a timestamp. Pure. */
@@ -35,14 +67,22 @@ function dayKey(iso: string): string {
 export function computeStats(
   bots: Bot[],
   conversations: Conversation[],
-  now: number
+  now: number,
+  feedback: FeedbackTotals = { up: 0, down: 0 }
 ): DashboardStats {
   const botName = new Map(bots.map((b) => [b.id, b.name]));
 
   let messageCount = 0;
   let activeConversationCount = 0;
+  let cartAdds = 0;
+  let prevConversationCount = 0;
+  let prevMessageCount = 0;
   const toolTotals: Record<string, number> = {};
   const perBotCounts: Record<string, number> = {};
+  const questionCounts = new Map<string, { question: string; count: number }>();
+
+  const sevenDaysAgo = now - 7 * 86_400_000;
+  const fourteenDaysAgo = now - 14 * 86_400_000;
 
   // Build the 7-day window (oldest → newest).
   const byDay = new Map<string, number>();
@@ -59,11 +99,31 @@ export function computeStats(
     const key = dayKey(c.created_at);
     if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0) + 1);
 
+    const created = new Date(c.created_at).getTime();
+    if (created >= fourteenDaysAgo && created < sevenDaysAgo) {
+      prevConversationCount += 1;
+      prevMessageCount += c.messages.length;
+    }
+
     const calls = countToolCalls(c.messages);
     for (const [name, n] of Object.entries(calls)) {
       toolTotals[name] = (toolTotals[name] ?? 0) + n;
     }
+    cartAdds += calls["add_to_cart"] ?? 0;
+
+    const q = firstUserQuestion(c);
+    if (q) {
+      const norm = normalizeQuestion(q);
+      const existing = questionCounts.get(norm);
+      if (existing) existing.count += 1;
+      else questionCounts.set(norm, { question: q.trim().slice(0, 120), count: 1 });
+    }
   }
+
+  const score =
+    feedback.up + feedback.down > 0
+      ? feedback.up / (feedback.up + feedback.down)
+      : null;
 
   return {
     botCount: bots.length,
@@ -84,15 +144,45 @@ export function computeStats(
         conversationCount: perBotCounts[b.id] ?? 0,
       }))
       .sort((a, b) => b.conversationCount - a.conversationCount),
+    topQuestions: [...questionCounts.values()]
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8),
+    cartAdds,
+    csat: { up: feedback.up, down: feedback.down, score },
+    prev: {
+      conversationCount: prevConversationCount,
+      messageCount: prevMessageCount,
+    },
   };
 }
 
+/** Fetch thumbs up/down totals for the owner's bots (RLS-scoped). */
+async function fetchFeedbackTotals(): Promise<FeedbackTotals> {
+  try {
+    const supabase = await createServerSupabase();
+    const { data, error } = await supabase
+      .from("message_feedback")
+      .select("rating");
+    if (error || !data) return { up: 0, down: 0 };
+    let up = 0;
+    let down = 0;
+    for (const row of data) {
+      if ((row as { rating?: unknown }).rating === "up") up += 1;
+      else if ((row as { rating?: unknown }).rating === "down") down += 1;
+    }
+    return { up, down };
+  } catch {
+    return { up: 0, down: 0 };
+  }
+}
+
 export async function getDashboardStats(now?: number): Promise<DashboardStats> {
-  const [bots, conversations] = await Promise.all([
+  const [bots, conversations, feedback] = await Promise.all([
     listBots(),
     listConversationsWithMessagesForOwner(),
+    fetchFeedbackTotals(),
   ]);
   // Read the clock here (data layer), not in the calling React component, so we
   // don't trip react-hooks/purity by invoking Date.now() during render.
-  return computeStats(bots, conversations, now ?? Date.now());
+  return computeStats(bots, conversations, now ?? Date.now(), feedback);
 }

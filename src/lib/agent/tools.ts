@@ -12,6 +12,32 @@ import type { Bot } from "@/lib/db/bots";
 
 type ChatTool = OpenAI.Chat.Completions.ChatCompletionTool;
 
+/**
+ * `search_knowledge` is a SERVER-executed tool (it queries our own DB), unlike
+ * the storefront tools which execute in the shopper's browser. The runtime runs
+ * it inline and loops, rather than returning it to the client. It is always
+ * offered so the model can ground answers in merchant-provided content.
+ */
+export const SEARCH_KNOWLEDGE_TOOL: ChatTool = {
+  type: "function",
+  function: {
+    name: "search_knowledge",
+    description:
+      "Search the store's knowledge base (merchant-provided FAQs, policies, and product info) for information to answer the shopper. Prefer answering from these results; use this before saying you don't know.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "What to look up." },
+      },
+      required: ["query"],
+      additionalProperties: false,
+    },
+  },
+};
+
+/** Names of tools the SERVER executes inline (not delegated to the browser). */
+export const SERVER_TOOL_NAMES: ReadonlySet<string> = new Set(["search_knowledge"]);
+
 /** Narrow an arbitrary string to a known `ToolName`, or `null`. */
 export function asToolName(name: string): ToolName | null {
   return (ALL_TOOL_NAMES as string[]).includes(name)
@@ -79,6 +105,7 @@ export function systemPrompt(bot: Bot): string {
     "- Tools execute in the shopper's browser, so results may take a moment and can occasionally fail; handle missing or error results gracefully.",
     `- ${mutatingLine}`,
     "- Only make claims about products, prices, stock, or the cart that are backed by tool results. If you do not know, use a read-only tool or say you are not sure.",
+    "- You can call search_knowledge at any time to look up the store's FAQs, policies, and product info the merchant provided. Prefer answering from those results, and use it before telling the shopper you don't know.",
     "- Be concise and friendly. Keep responses focused on helping the shopper complete their task.",
   ].join("\n");
 }

@@ -15,6 +15,8 @@ export interface Bot {
   persona: string;
   allowed_tools: string[];
   allowed_origins: string[];
+  /** Raw widget appearance config (jsonb); resolve via resolveAppearance(). */
+  appearance: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -26,10 +28,12 @@ export interface CreateBotInput {
   allowed_origins?: string[];
 }
 
-export type UpdateBotPatch = Partial<CreateBotInput>;
+export type UpdateBotPatch = Partial<CreateBotInput> & {
+  appearance?: Record<string, unknown>;
+};
 
 const BOT_COLUMNS =
-  "id, owner_id, name, persona, allowed_tools, allowed_origins, created_at, updated_at";
+  "id, owner_id, name, persona, allowed_tools, allowed_origins, appearance, created_at, updated_at";
 
 /**
  * Normalize a list of origins: trim whitespace, drop empties, lowercase the
@@ -62,6 +66,10 @@ export function mapRowToBot(row: Record<string, unknown>): Bot {
     allowed_origins: Array.isArray(row.allowed_origins)
       ? (row.allowed_origins as unknown[]).map(String)
       : [],
+    appearance:
+      row.appearance && typeof row.appearance === "object"
+        ? (row.appearance as Record<string, unknown>)
+        : {},
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -128,6 +136,7 @@ export async function updateBot(id: string, patch: UpdateBotPatch): Promise<Bot>
   if (patch.allowed_origins !== undefined) {
     update.allowed_origins = normalizeOrigins(patch.allowed_origins);
   }
+  if (patch.appearance !== undefined) update.appearance = patch.appearance;
   update.updated_at = new Date().toISOString();
 
   const { data, error } = await supabase
