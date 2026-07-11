@@ -18,7 +18,7 @@ npx vitest run src/lib/db/bots.test.ts   # run a single test file
 npx tsc --noEmit     # typecheck only (build also does this)
 ```
 
-Environment: copy `.env.example` → `.env.local`. Needs Supabase keys, an OpenRouter API key, and `AGENT_MODEL`. Apply `supabase/schema.sql` to the Supabase project (SQL editor or `supabase db push`) to create the `bots` / `conversations` tables and their RLS policies.
+Environment: copy `.env.example` → `.env.local`. Needs Supabase keys, an OpenRouter API key, and `AGENT_MODEL`. Apply the numbered migrations in `supabase/migrations/` in order (SQL editor or `supabase db push`) to create the `bots` / `conversations` tables and their RLS policies.
 
 ## Architecture
 
@@ -44,6 +44,10 @@ Security: `/api/chat/turn` validates the request `Origin` against the bot's `all
 Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and **account settings** (`/dashboard/settings` + `/api/account`). Not yet exercised end-to-end against a live Shopify store.
 
 Note: `.env.local` (gitignored) holds real secrets — never paste keys into the tracked `.env.example`.
+
+## Design system
+
+The UI follows an Apple-inspired design system. Tokens live in `src/app/globals.css` (`@theme` → utilities like `bg-canvas`, `bg-surface`, `text-ink`, `text-muted`, `border-hairline`, `bg-accent`, plus `--shadow-*` and radius scales); they auto-switch light/dark via `prefers-color-scheme`, so **do not add `dark:` variants or raw zinc/neutral palettes** — use the tokens. Reusable primitives are in `src/components/ui/` (`Button`/`ButtonLink`, `Card`, `Input`/`Textarea`, `Field`, `Badge`) with `cn()` in `src/lib/cn.ts`. New pages should compose these rather than hand-rolling styles. The embeddable widget (`public/widget.js`) carries its own self-contained styles (Shadow DOM) mirroring the same aesthetic.
 
 ## Development workflow
 

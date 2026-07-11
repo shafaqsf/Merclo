@@ -1,13 +1,24 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getConversationForOwner } from "@/lib/db/conversations";
 import type { ConversationStatus } from "@/lib/db/conversations";
 import { listBots } from "@/lib/db/bots";
+import { Card, CardBody } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { ButtonLink } from "@/components/ui/Button";
 
 function formatDate(value: string): string {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString();
 }
+
+const STATUS_TONES: Record<
+  ConversationStatus,
+  "accent" | "warning" | "neutral"
+> = {
+  active: "accent",
+  awaiting_tool: "warning",
+  closed: "neutral",
+};
 
 const STATUS_LABELS: Record<ConversationStatus, string> = {
   active: "Active",
@@ -76,10 +87,10 @@ function ToolCallChip({ call }: { call: ToolCall }) {
   const name = call.function?.name ?? call.name ?? "unknown";
   const args = call.function?.arguments ?? "";
   return (
-    <div className="mt-2 inline-flex max-w-full items-start gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 font-mono text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+    <div className="mt-2 inline-flex max-w-full items-start gap-1.5 rounded-full bg-surface-2 px-3 py-1 font-mono text-xs text-muted">
       <span aria-hidden>🔧</span>
       <span className="break-all">
-        called {name}({args})
+        {name}({args})
       </span>
     </div>
   );
@@ -93,9 +104,13 @@ function MessageBlock({ raw }: { raw: unknown }) {
 
   if (role === "system") {
     return (
-      <div className="rounded-md border border-dashed border-zinc-300 bg-zinc-50/50 px-3 py-2 text-xs text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-500">
-        <span className="font-medium uppercase tracking-wide">System</span>
-        {text && <p className="mt-1 whitespace-pre-wrap">{text}</p>}
+      <div className="text-center">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-faint">
+          System
+        </span>
+        {text && (
+          <p className="mt-1 whitespace-pre-wrap text-xs text-muted">{text}</p>
+        )}
       </div>
     );
   }
@@ -103,7 +118,7 @@ function MessageBlock({ raw }: { raw: unknown }) {
   if (role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-zinc-900 px-3.5 py-2 text-sm text-white dark:bg-zinc-100 dark:text-zinc-900">
+        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-sm text-accent-ink">
           <p className="whitespace-pre-wrap break-words">{text || "—"}</p>
         </div>
       </div>
@@ -114,10 +129,10 @@ function MessageBlock({ raw }: { raw: unknown }) {
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%]">
-          <p className="mb-1 text-xs text-zinc-400">
+          <p className="mb-1 text-xs text-faint">
             ↳ result{msg.name ? ` · ${msg.name}` : ""}
           </p>
-          <pre className="overflow-x-auto rounded-md bg-zinc-950 px-3 py-2 text-xs text-zinc-100">
+          <pre className="overflow-x-auto rounded-lg bg-surface-2 px-3 py-2 font-mono text-xs text-muted">
             <code>{prettyJson(msg.content)}</code>
           </pre>
         </div>
@@ -130,7 +145,7 @@ function MessageBlock({ raw }: { raw: unknown }) {
       <div className="flex justify-start">
         <div className="max-w-[80%]">
           {(text || toolCalls.length === 0) && (
-            <div className="rounded-2xl rounded-bl-sm border border-zinc-200 bg-white px-3.5 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+            <div className="rounded-2xl rounded-bl-md border border-hairline bg-surface px-4 py-2.5 text-sm text-ink">
               <p className="whitespace-pre-wrap break-words">{text || "—"}</p>
             </div>
           )}
@@ -146,9 +161,9 @@ function MessageBlock({ raw }: { raw: unknown }) {
 
   // Unknown shape — render defensively.
   return (
-    <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
-      <p className="mb-1 text-xs text-zinc-400">{role ?? "unknown"}</p>
-      <pre className="overflow-x-auto text-xs text-zinc-600 dark:text-zinc-400">
+    <div className="rounded-xl border border-hairline bg-surface-2 px-3 py-2">
+      <p className="mb-1 text-xs text-faint">{role ?? "unknown"}</p>
+      <pre className="overflow-x-auto font-mono text-xs text-muted">
         <code>{prettyJson(raw)}</code>
       </pre>
     </div>
@@ -169,32 +184,39 @@ export default async function ConversationPage({
     bots.find((b) => b.id === conversation.bot_id)?.name ?? "Unknown bot";
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-10">
-      <Link
-        href="/dashboard/conversations"
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-200"
-      >
-        &larr; Back to conversations
-      </Link>
-
-      <div className="mt-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-            {botName}
-          </h1>
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
-            {STATUS_LABELS[conversation.status]}
-          </span>
-        </div>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Created {formatDate(conversation.created_at)} · Updated{" "}
-          {formatDate(conversation.updated_at)}
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-3xl px-6 py-12">
+      <Card>
+        <CardBody>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl font-semibold tracking-tight text-ink">
+                  {botName}
+                </h1>
+                <Badge tone={STATUS_TONES[conversation.status]}>
+                  {STATUS_LABELS[conversation.status]}
+                </Badge>
+              </div>
+              <p className="mt-2 text-xs text-muted">
+                Created {formatDate(conversation.created_at)} · Updated{" "}
+                {formatDate(conversation.updated_at)}
+              </p>
+            </div>
+            <ButtonLink
+              href="/dashboard/conversations"
+              variant="ghost"
+              size="sm"
+              className="shrink-0"
+            >
+              &larr; Back
+            </ButtonLink>
+          </div>
+        </CardBody>
+      </Card>
 
       <div className="mt-6 space-y-3">
         {conversation.messages.length === 0 ? (
-          <p className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="py-12 text-center text-sm text-muted">
             No messages in this conversation.
           </p>
         ) : (

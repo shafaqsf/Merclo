@@ -1,6 +1,7 @@
--- Merclo schema. Apply via the Supabase SQL editor or `supabase db push`.
--- Merchants are represented by Supabase Auth users (auth.users); the `bots`
--- and `conversations` tables reference them.
+-- 0001_initial_schema
+-- Core Merclo schema. Merchants are Supabase Auth users (auth.users); the
+-- `bots` and `conversations` tables reference them.
+-- Apply via the Supabase SQL editor or `supabase db push`.
 
 create extension if not exists "pgcrypto";
 
@@ -23,7 +24,7 @@ create table if not exists public.bots (
 create table if not exists public.conversations (
   id uuid primary key default gen_random_uuid(),
   bot_id uuid not null references public.bots (id) on delete cascade,
-  messages jsonb not null default '[]'::jsonb, -- OpenAI Agents SDK items
+  messages jsonb not null default '[]'::jsonb, -- OpenAI chat message items
   status text not null default 'active',       -- active | awaiting_tool | closed
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -41,16 +42,4 @@ create policy "owners manage their bots" on public.bots
 
 -- Conversations are written by the server using the service-role key, which
 -- bypasses RLS. No anon policy is defined, so the public anon key cannot read
--- or write conversations directly.
-
--- Merchants may READ conversations belonging to their own bots (dashboard:
--- conversations viewer + analytics). Read-only; all writes still go through the
--- service-role key from the chat runtime.
-create policy "owners read their bots' conversations" on public.conversations
-  for select using (
-    exists (
-      select 1 from public.bots
-      where public.bots.id = public.conversations.bot_id
-        and public.bots.owner_id = auth.uid()
-    )
-  );
+-- or write conversations directly. The owner read policy is added in 0002.

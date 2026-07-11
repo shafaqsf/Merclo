@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { Card, CardBody } from "@/components/ui/Card";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { Input, Textarea } from "@/components/ui/Input";
+import { Field } from "@/components/ui/Field";
 
 export default function NewBotPage() {
   const router = useRouter();
@@ -35,75 +39,58 @@ export default function NewBotPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-6 py-10">
+    <div className="mx-auto w-full max-w-2xl px-6 py-12">
       <Link
         href="/dashboard/bots"
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-200"
+        className="text-sm text-muted transition-colors hover:text-ink"
       >
         &larr; Back to bots
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="mt-5 text-3xl font-semibold tracking-tight text-ink">
         New bot
       </h1>
+      <p className="mt-2 text-sm text-muted">
+        Give your assistant a name and an optional persona to get started.
+      </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-        <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Storefront assistant"
-            className="mt-1.5 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-        </div>
+      <Card className="mt-8">
+        <CardBody className="p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <Field label="Name" htmlFor="name">
+              <Input
+                id="name"
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Storefront assistant"
+              />
+            </Field>
 
-        <div>
-          <label
-            htmlFor="persona"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Persona{" "}
-            <span className="font-normal text-zinc-400">(optional)</span>
-          </label>
-          <textarea
-            id="persona"
-            rows={4}
-            value={persona}
-            onChange={(e) => setPersona(e.target.value)}
-            placeholder="A friendly, concise shopping assistant that..."
-            className="mt-1.5 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-        </div>
+            <Field label="Persona" htmlFor="persona" hint="Optional">
+              <Textarea
+                id="persona"
+                rows={4}
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
+                placeholder="A friendly, concise shopping assistant that..."
+              />
+            </Field>
 
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
+            {error && <p className="text-sm text-danger">{error}</p>}
 
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={submitting || !name.trim()}
-            className="inline-flex h-9 items-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
-            {submitting ? "Creating…" : "Create bot"}
-          </button>
-          <Link
-            href="/dashboard/bots"
-            className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-200"
-          >
-            Cancel
-          </Link>
-        </div>
-      </form>
+            <div className="flex items-center gap-3 pt-1">
+              <Button type="submit" disabled={submitting || !name.trim()}>
+                {submitting ? "Creating…" : "Create bot"}
+              </Button>
+              <ButtonLink href="/dashboard/bots" variant="ghost">
+                Cancel
+              </ButtonLink>
+            </div>
+          </form>
+        </CardBody>
+      </Card>
     </div>
   );
 }

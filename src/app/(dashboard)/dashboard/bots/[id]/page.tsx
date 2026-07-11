@@ -6,6 +6,12 @@ import Link from "next/link";
 import { ALL_TOOL_NAMES, TOOL_DEFINITIONS } from "@/lib/tools/schema";
 import { buildEmbedSnippet } from "@/lib/embed";
 import type { Bot } from "@/lib/db/bots";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { Input, Textarea } from "@/components/ui/Input";
+import { Field } from "@/components/ui/Field";
+import { Badge } from "@/components/ui/Badge";
+import { cn } from "@/lib/cn";
 
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -115,172 +121,156 @@ export default function EditBotPage({
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-6 py-10 text-sm text-zinc-500">
+      <div className="mx-auto w-full max-w-2xl px-6 py-12 text-sm text-muted">
         Loading…
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-6 py-10">
+    <div className="mx-auto w-full max-w-2xl px-6 py-12">
       <Link
         href="/dashboard/bots"
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-200"
+        className="text-sm text-muted transition-colors hover:text-ink"
       >
         &larr; Back to bots
       </Link>
 
-      <div className="mt-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <div className="mt-5 flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-semibold tracking-tight text-ink">
           Edit bot
         </h1>
-        <Link
+        <ButtonLink
           href={`/dashboard/bots/${id}/playground`}
-          className="inline-flex h-9 items-center rounded-md border border-zinc-300 px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+          variant="secondary"
         >
           Test in playground
-        </Link>
+        </ButtonLink>
       </div>
 
       <form onSubmit={handleSave} className="mt-8 space-y-6">
-        <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1.5 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-        </div>
+        <Card>
+          <CardBody className="space-y-6 p-8">
+            <Field label="Name" htmlFor="name">
+              <Input
+                id="name"
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Field>
 
-        <div>
-          <label
-            htmlFor="persona"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Persona / instructions
-          </label>
-          <textarea
-            id="persona"
-            rows={5}
-            value={persona}
-            onChange={(e) => setPersona(e.target.value)}
-            className="mt-1.5 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-        </div>
+            <Field label="Persona / instructions" htmlFor="persona">
+              <Textarea
+                id="persona"
+                rows={5}
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
+              />
+            </Field>
 
-        <fieldset>
-          <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Allowed tools
-          </legend>
-          <div className="mt-2 space-y-2">
-            {ALL_TOOL_NAMES.map((tool) => {
-              const def = TOOL_DEFINITIONS[tool];
-              return (
-                <label
-                  key={tool}
-                  className="flex items-start gap-2.5 rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800"
-                >
-                  <input
-                    type="checkbox"
-                    checked={allowedTools.includes(tool)}
-                    onChange={() => toggleTool(tool)}
-                    className="mt-0.5"
-                  />
-                  <span>
-                    <span className="block font-mono text-xs text-zinc-900 dark:text-zinc-100">
-                      {tool}
-                      {def.mutating && (
-                        <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-                          mutating
+            <Field
+              label="Allowed storefront origins"
+              htmlFor="origins"
+              hint="Comma-separated. The chat endpoint rejects requests from origins not listed here. Leave empty to allow any origin (development only)."
+            >
+              <Input
+                id="origins"
+                type="text"
+                value={originsText}
+                onChange={(e) => setOriginsText(e.target.value)}
+                placeholder="https://my-store.myshopify.com, https://mystore.com"
+              />
+            </Field>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-sm font-medium text-ink">Allowed tools</h2>
+            <p className="mt-0.5 text-xs text-muted">
+              Choose which actions this assistant can perform.
+            </p>
+          </CardHeader>
+          <CardBody className="p-3">
+            <div className="space-y-1">
+              {ALL_TOOL_NAMES.map((tool) => {
+                const def = TOOL_DEFINITIONS[tool];
+                const active = allowedTools.includes(tool);
+                return (
+                  <label
+                    key={tool}
+                    className={cn(
+                      "flex cursor-pointer items-start gap-3 rounded-xl px-4 py-3 transition-colors",
+                      active ? "bg-accent-soft" : "hover:bg-surface-2"
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={active}
+                      onChange={() => toggleTool(tool)}
+                      className="mt-0.5 h-4 w-4 accent-[color:var(--accent)]"
+                    />
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs text-ink">
+                          {tool}
                         </span>
-                      )}
+                        {def.mutating && (
+                          <Badge tone="warning">mutating</Badge>
+                        )}
+                      </span>
+                      <span className="mt-1 block text-xs text-muted">
+                        {def.description}
+                      </span>
                     </span>
-                    <span className="block text-xs text-zinc-500">
-                      {def.description}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
+                  </label>
+                );
+              })}
+            </div>
+          </CardBody>
+        </Card>
 
-        <div>
-          <label
-            htmlFor="origins"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Allowed storefront origins{" "}
-            <span className="font-normal text-zinc-400">(comma-separated)</span>
-          </label>
-          <input
-            id="origins"
-            type="text"
-            value={originsText}
-            onChange={(e) => setOriginsText(e.target.value)}
-            placeholder="https://my-store.myshopify.com, https://mystore.com"
-            className="mt-1.5 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-          <p className="mt-1 text-xs text-zinc-500">
-            The chat endpoint rejects requests from origins not listed here.
-            Leave empty to allow any origin (development only).
-          </p>
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
+        {error && <p className="text-sm text-danger">{error}</p>}
         {saved && (
-          <p className="text-sm text-green-600 dark:text-green-400">Saved.</p>
+          <p className="text-sm text-[color:var(--success)]">Saved.</p>
         )}
 
         <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={saving || !name.trim()}
-            className="inline-flex h-9 items-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
+          <Button type="submit" disabled={saving || !name.trim()}>
             {saving ? "Saving…" : "Save changes"}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="inline-flex h-9 items-center rounded-md border border-red-300 px-4 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/40"
-          >
+          </Button>
+          <Button type="button" variant="danger" onClick={handleDelete}>
             Delete
-          </button>
+          </Button>
         </div>
       </form>
 
-      <section className="mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-        <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Embed snippet
-        </h2>
-        <p className="mt-1 text-xs text-zinc-500">
-          Paste this into your Shopify theme (e.g. before{" "}
-          <code>&lt;/body&gt;</code> in <code>theme.liquid</code>).
-        </p>
-        <div className="mt-3 flex items-start gap-2">
-          <pre className="flex-1 overflow-x-auto rounded-md bg-zinc-950 px-3 py-2.5 text-xs text-zinc-100">
+      <Card className="mt-12">
+        <CardHeader>
+          <h2 className="text-sm font-medium text-ink">Embed snippet</h2>
+          <p className="mt-0.5 text-xs text-muted">
+            Paste this into your Shopify theme (e.g. before{" "}
+            <code>&lt;/body&gt;</code> in <code>theme.liquid</code>).
+          </p>
+        </CardHeader>
+        <CardBody className="space-y-3 p-5">
+          <pre className="overflow-x-auto rounded-xl bg-[#1d1d1f] px-4 py-3.5 text-xs leading-relaxed text-[#f5f5f7]">
             <code>{snippet}</code>
           </pre>
-          <button
-            type="button"
-            onClick={copySnippet}
-            className="inline-flex h-9 shrink-0 items-center rounded-md border border-zinc-300 px-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
-          >
-            {copied ? "Copied" : "Copy"}
-          </button>
-        </div>
-      </section>
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={copySnippet}
+            >
+              {copied ? "Copied" : "Copy"}
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
     </div>
   );
 }
