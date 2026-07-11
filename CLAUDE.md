@@ -41,7 +41,9 @@ Security: `/api/chat/turn` validates the request `Origin` against the bot's `all
 
 ## Project status
 
-Foundational scaffold is in place (dashboard auth, bot CRUD, agent runtime, widget). Not yet wired to a live Supabase project or a real Shopify store. Dashboard panels beyond bot CRUD are intentionally deferred.
+Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and **account settings** (`/dashboard/settings` + `/api/account`). Not yet exercised end-to-end against a live Shopify store.
+
+Note: `.env.local` (gitignored) holds real secrets — never paste keys into the tracked `.env.example`.
 
 ## Development workflow
 
