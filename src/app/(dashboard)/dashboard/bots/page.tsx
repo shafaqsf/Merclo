@@ -1,64 +1,70 @@
 import Link from "next/link";
 import { listBots } from "@/lib/db/bots";
+import { Card, CardBody } from "@/components/ui/Card";
+import { ButtonLink } from "@/components/ui/Button";
 
 export default async function BotsPage() {
   const bots = await listBots();
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-10">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="mx-auto w-full max-w-3xl px-6 py-12">
+      <div className="mb-10 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-3xl font-semibold tracking-tight text-ink">
             Bots
           </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-2 text-sm text-muted">
             Manage the assistants you embed on your storefront.
           </p>
         </div>
-        <Link
-          href="/dashboard/bots/new"
-          className="inline-flex h-9 items-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          New bot
-        </Link>
+        <ButtonLink href="/dashboard/bots/new">New bot</ButtonLink>
       </div>
 
       {bots.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-zinc-300 p-12 text-center dark:border-zinc-700">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            You don&apos;t have any bots yet.
-          </p>
-          <Link
-            href="/dashboard/bots/new"
-            className="mt-4 inline-flex h-9 items-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
-            Create your first bot
-          </Link>
-        </div>
+        <Card>
+          <CardBody className="flex flex-col items-center gap-4 px-6 py-16 text-center">
+            <div>
+              <p className="text-base font-medium text-ink">No bots yet</p>
+              <p className="mt-1 text-sm text-muted">
+                Create your first assistant to embed on your storefront.
+              </p>
+            </div>
+            <ButtonLink href="/dashboard/bots/new">New bot</ButtonLink>
+          </CardBody>
+        </Card>
       ) : (
-        <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+        <div className="space-y-3">
           {bots.map((bot) => (
-            <li key={bot.id}>
-              <Link
-                href={`/dashboard/bots/${bot.id}`}
-                className="flex items-center justify-between px-4 py-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900"
-              >
-                <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-50">
-                    {bot.name}
-                  </p>
-                  <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                    {bot.allowed_tools.length} tool
-                    {bot.allowed_tools.length === 1 ? "" : "s"} enabled
-                  </p>
-                </div>
-                <span className="text-sm text-zinc-400" aria-hidden>
-                  &rarr;
-                </span>
-              </Link>
-            </li>
+            <Link
+              key={bot.id}
+              href={`/dashboard/bots/${bot.id}`}
+              className="group block"
+            >
+              <Card className="transition-all duration-200 hover:border-hairline-strong hover:shadow-[var(--shadow-md)]">
+                <CardBody className="flex items-center justify-between gap-4 px-5 py-4">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-ink">{bot.name}</p>
+                    <p className="mt-0.5 text-xs text-muted">
+                      {bot.allowed_tools.length} tool
+                      {bot.allowed_tools.length === 1 ? "" : "s"} &middot;{" "}
+                      {bot.allowed_origins.length} origin
+                      {bot.allowed_origins.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <span
+                    className="flex shrink-0 items-center gap-1 text-sm text-faint transition-colors group-hover:text-accent"
+                    aria-hidden
+                  >
+                    Edit
+                    <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+                      &rsaquo;
+                    </span>
+                  </span>
+                </CardBody>
+              </Card>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

@@ -2,6 +2,10 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { createBrowserSupabase } from "@/lib/supabase/client";
+import { Card, CardHeader, CardBody } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Field } from "@/components/ui/Field";
 import DeleteAccount from "./_components/DeleteAccount";
 
 export default function SettingsPage() {
@@ -79,110 +83,97 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">
-          Account settings
-        </h2>
-        <p className="mt-1 text-sm text-neutral-500">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
+      <header>
+        <h1 className="text-3xl font-semibold tracking-tight text-ink">
+          Settings
+        </h1>
+        <p className="mt-1.5 text-sm text-muted">
           Manage your profile, password, and account.
         </p>
-      </div>
+      </header>
 
       {/* Profile */}
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6">
-        <h3 className="text-lg font-semibold tracking-tight text-neutral-900">
-          Profile
-        </h3>
-        <p className="mt-1 text-sm text-neutral-500">
-          The email address associated with your account.
-        </p>
-
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-neutral-700">
-            Email
-          </label>
-          {loadingUser ? (
-            <div className="mt-1 h-9 w-full max-w-sm animate-pulse rounded-lg bg-neutral-100" />
-          ) : userError ? (
-            <p className="mt-1 text-sm text-red-600" role="alert">
-              {userError}
-            </p>
-          ) : (
-            <input
-              type="email"
-              value={email ?? ""}
-              readOnly
-              className="mt-1 w-full max-w-sm rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-600"
-            />
-          )}
-        </div>
-      </section>
+      <Card>
+        <CardHeader>
+          <h2 className="text-base font-semibold tracking-tight text-ink">
+            Profile
+          </h2>
+          <p className="mt-0.5 text-sm text-muted">
+            The email address associated with your account.
+          </p>
+        </CardHeader>
+        <CardBody>
+          <Field label="Email" htmlFor="account-email">
+            {loadingUser ? (
+              <div className="h-11 w-full max-w-sm animate-pulse rounded-xl bg-surface-2" />
+            ) : userError ? (
+              <p className="text-sm text-danger" role="alert">
+                {userError}
+              </p>
+            ) : (
+              <div className="w-full max-w-sm rounded-xl bg-surface-2 px-3.5 py-2.5 text-sm text-muted">
+                {email ?? "—"}
+              </div>
+            )}
+          </Field>
+        </CardBody>
+      </Card>
 
       {/* Change password */}
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6">
-        <h3 className="text-lg font-semibold tracking-tight text-neutral-900">
-          Change password
-        </h3>
-        <p className="mt-1 text-sm text-neutral-500">
-          Choose a new password of at least 8 characters.
-        </p>
+      <Card>
+        <CardHeader>
+          <h2 className="text-base font-semibold tracking-tight text-ink">
+            Change password
+          </h2>
+          <p className="mt-0.5 text-sm text-muted">
+            Choose a new password of at least 8 characters.
+          </p>
+        </CardHeader>
+        <CardBody>
+          <form onSubmit={handleChangePassword} className="space-y-5">
+            <Field label="New password" htmlFor="new-password">
+              <Input
+                id="new-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                className="max-w-sm"
+              />
+            </Field>
 
-        <form onSubmit={handleChangePassword} className="mt-4 space-y-4">
-          <div>
-            <label
-              htmlFor="new-password"
-              className="block text-sm font-medium text-neutral-700"
-            >
-              New password
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              className="mt-1 w-full max-w-sm rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100"
-            />
-          </div>
+            <Field label="Confirm password" htmlFor="confirm-password">
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                className="max-w-sm"
+              />
+            </Field>
 
-          <div>
-            <label
-              htmlFor="confirm-password"
-              className="block text-sm font-medium text-neutral-700"
-            >
-              Confirm password
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-              className="mt-1 w-full max-w-sm rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100"
-            />
-          </div>
+            {passwordError ? (
+              <p className="text-sm text-danger" role="alert">
+                {passwordError}
+              </p>
+            ) : null}
+            {passwordSuccess ? (
+              <p
+                className="text-sm text-[color:var(--success)]"
+                role="status"
+              >
+                {passwordSuccess}
+              </p>
+            ) : null}
 
-          {passwordError ? (
-            <p className="text-sm text-red-600" role="alert">
-              {passwordError}
-            </p>
-          ) : null}
-          {passwordSuccess ? (
-            <p className="text-sm text-green-600" role="status">
-              {passwordSuccess}
-            </p>
-          ) : null}
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Update password"}
-          </button>
-        </form>
-      </section>
+            <Button type="submit" variant="primary" disabled={saving}>
+              {saving ? "Saving…" : "Update password"}
+            </Button>
+          </form>
+        </CardBody>
+      </Card>
 
       {/* Danger zone */}
       <DeleteAccount />

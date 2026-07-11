@@ -1,7 +1,10 @@
 "use client";
 
 import { use, useRef, useState } from "react";
-import Link from "next/link";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card } from "@/components/ui/Card";
+import { cn } from "@/lib/cn";
 
 /* ------------------------------------------------------------------ *
  * Types
@@ -290,27 +293,28 @@ export default function PlaygroundPage({
 
   return (
     <div className="mx-auto flex h-[calc(100vh-2rem)] w-full max-w-2xl flex-col px-6 py-10">
-      <Link
-        href={`/dashboard/bots/${botId}`}
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-200"
-      >
-        &larr; Back to bot
-      </Link>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
+            Playground
+          </h1>
+          <p className="mt-1.5 text-xs text-muted">
+            Uses mock storefront data — tools return fake products &amp; cart.
+          </p>
+        </div>
+        <ButtonLink
+          href={`/dashboard/bots/${botId}`}
+          variant="ghost"
+          size="sm"
+        >
+          &larr; Back to bot
+        </ButtonLink>
+      </header>
 
-      <div className="mt-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Playground
-        </h1>
-        <p className="mt-1 text-xs text-zinc-500">
-          Playground uses mock storefront data — tools return fake
-          products/cart.
-        </p>
-      </div>
-
-      <div className="mt-6 flex flex-1 flex-col overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-          {transcript.length === 0 && (
-            <p className="py-8 text-center text-sm text-zinc-400">
+      <Card className="mt-6 flex flex-1 flex-col overflow-hidden shadow-[var(--shadow-md)]">
+        <div className="flex-1 space-y-3 overflow-y-auto px-5 py-6">
+          {transcript.length === 0 && !pending && (
+            <p className="py-12 text-center text-sm text-faint">
               Send a message to test this bot.
             </p>
           )}
@@ -318,21 +322,19 @@ export default function PlaygroundPage({
           {transcript.map((item) => {
             if (item.role === "tool") {
               return (
-                <div
-                  key={item.id}
-                  className="font-mono text-xs text-zinc-400 dark:text-zinc-500"
-                >
-                  {item.content}
+                <div key={item.id} className="flex justify-center">
+                  <span className="rounded-full bg-surface-2 px-3 py-1 text-[11px] font-medium text-faint">
+                    {item.content}
+                  </span>
                 </div>
               );
             }
             if (item.role === "error") {
               return (
-                <div
-                  key={item.id}
-                  className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400"
-                >
-                  {item.content}
+                <div key={item.id} className="flex justify-center">
+                  <div className="rounded-xl bg-accent-soft px-4 py-2 text-sm text-danger">
+                    {item.content}
+                  </div>
                 </div>
               );
             }
@@ -340,15 +342,15 @@ export default function PlaygroundPage({
             return (
               <div
                 key={item.id}
-                className={isUser ? "flex justify-end" : "flex justify-start"}
+                className={cn("flex", isUser ? "justify-end" : "justify-start")}
               >
                 <div
-                  className={
-                    "max-w-[80%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm " +
-                    (isUser
-                      ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                      : "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100")
-                  }
+                  className={cn(
+                    "max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-[var(--shadow-sm)]",
+                    isUser
+                      ? "bg-accent text-accent-ink"
+                      : "bg-surface-2 text-ink"
+                  )}
                 >
                   {item.content}
                 </div>
@@ -358,8 +360,10 @@ export default function PlaygroundPage({
 
           {pending && (
             <div className="flex justify-start">
-              <div className="rounded-2xl bg-zinc-100 px-3.5 py-2 text-sm text-zinc-500 dark:bg-zinc-800">
-                typing…
+              <div className="flex items-center gap-1.5 rounded-2xl bg-surface-2 px-4 py-3.5 shadow-[var(--shadow-sm)]">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-faint [animation-delay:0ms]" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-faint [animation-delay:150ms]" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-faint [animation-delay:300ms]" />
               </div>
             </div>
           )}
@@ -367,25 +371,26 @@ export default function PlaygroundPage({
 
         <form
           onSubmit={handleSend}
-          className="flex items-center gap-2 border-t border-zinc-200 px-3 py-3 dark:border-zinc-800"
+          className="flex items-center gap-2.5 border-t border-hairline px-4 py-4"
         >
-          <input
+          <Input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a message…"
             disabled={pending}
-            className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none focus:border-zinc-500 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="flex-1 rounded-full disabled:opacity-60"
           />
-          <button
+          <Button
             type="submit"
+            size="md"
             disabled={pending || !input.trim()}
-            className="inline-flex h-9 shrink-0 items-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="shrink-0"
           >
             {pending ? "…" : "Send"}
-          </button>
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

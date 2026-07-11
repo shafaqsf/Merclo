@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { getDashboardStats, type DashboardStats } from "@/lib/db/analytics";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { ButtonLink } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
 function formatDay(date: string): { weekday: string; short: string } {
   const d = new Date(`${date}T00:00:00Z`);
@@ -15,12 +18,14 @@ function formatDay(date: string): { weekday: string; short: string } {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-      <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight text-neutral-900">
-        {value.toLocaleString()}
-      </p>
-    </div>
+    <Card>
+      <CardBody>
+        <p className="text-xs uppercase tracking-wide text-faint">{label}</p>
+        <p className="mt-3 text-3xl font-semibold tracking-tight text-ink">
+          {value.toLocaleString()}
+        </p>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -31,126 +36,149 @@ function ConversationsChart({
 }) {
   const max = Math.max(1, ...data.map((d) => d.count));
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-      <h3 className="text-sm font-medium text-neutral-900">
-        Conversations (last 7 days)
-      </h3>
-      <div className="mt-6 flex h-40 items-end gap-2">
-        {data.map((d) => {
-          const { weekday, short } = formatDay(d.date);
-          const heightPct = (d.count / max) * 100;
-          return (
-            <div
-              key={d.date}
-              className="flex flex-1 flex-col items-center gap-2"
-            >
-              <span className="text-xs font-medium text-neutral-700">
-                {d.count}
-              </span>
-              <div className="flex w-full flex-1 items-end">
-                <div
-                  className="w-full rounded-t-md bg-neutral-800 transition-all"
-                  style={{ height: `${heightPct}%`, minHeight: d.count > 0 ? "4px" : "2px" }}
-                  aria-hidden
-                />
+    <Card>
+      <CardHeader>
+        <h3 className="text-sm font-semibold tracking-tight text-ink">
+          Last 7 days
+        </h3>
+      </CardHeader>
+      <CardBody>
+        <div className="flex h-44 items-end gap-3">
+          {data.map((d) => {
+            const { weekday, short } = formatDay(d.date);
+            const heightPct = (d.count / max) * 100;
+            return (
+              <div
+                key={d.date}
+                className="flex flex-1 flex-col items-center gap-2.5"
+              >
+                <span className="text-xs font-medium text-muted">
+                  {d.count}
+                </span>
+                <div className="flex w-full flex-1 items-end rounded-md bg-surface-2">
+                  <div
+                    className="w-full rounded-t-md bg-accent transition-all duration-300"
+                    style={{
+                      height: `${heightPct}%`,
+                      minHeight: d.count > 0 ? "4px" : "2px",
+                    }}
+                    aria-hidden
+                  />
+                </div>
+                <span className="text-center text-[11px] leading-tight text-faint">
+                  {weekday}
+                  <br />
+                  {short}
+                </span>
               </div>
-              <span className="text-center text-[11px] leading-tight text-neutral-500">
-                {weekday}
-                <br />
-                {short}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+            );
+          })}
+        </div>
+      </CardBody>
+    </Card>
   );
 }
 
 function ToolUsage({ data }: { data: DashboardStats["toolUsage"] }) {
   const max = Math.max(1, ...data.map((d) => d.count));
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-      <h3 className="text-sm font-medium text-neutral-900">Tool usage</h3>
-      {data.length === 0 ? (
-        <p className="mt-4 text-sm text-neutral-400">No tools used yet.</p>
-      ) : (
-        <ul className="mt-4 space-y-3">
-          {data.map((t) => (
-            <li key={t.name}>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="truncate font-medium text-neutral-700">
-                  {t.name}
-                </span>
-                <span className="ml-2 shrink-0 text-neutral-500">{t.count}</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-                <div
-                  className="h-full rounded-full bg-neutral-800"
-                  style={{ width: `${(t.count / max) * 100}%` }}
-                  aria-hidden
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <Card>
+      <CardHeader>
+        <h3 className="text-sm font-semibold tracking-tight text-ink">
+          Tool usage
+        </h3>
+      </CardHeader>
+      <CardBody>
+        {data.length === 0 ? (
+          <p className="text-sm text-faint">No tools used yet.</p>
+        ) : (
+          <ul className="space-y-4">
+            {data.map((t) => (
+              <li key={t.name}>
+                <div className="mb-1.5 flex items-center justify-between text-sm">
+                  <span className="truncate font-medium text-ink">
+                    {t.name}
+                  </span>
+                  <span className="ml-2 shrink-0 text-muted">{t.count}</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-accent-soft">
+                  <div
+                    className="h-full rounded-full bg-accent transition-all duration-300"
+                    style={{ width: `${(t.count / max) * 100}%` }}
+                    aria-hidden
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardBody>
+    </Card>
   );
 }
 
 function MostActiveBots({ data }: { data: DashboardStats["perBot"] }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-      <h3 className="text-sm font-medium text-neutral-900">Most active bots</h3>
-      {data.length === 0 ? (
-        <p className="mt-4 text-sm text-neutral-400">No bots yet.</p>
-      ) : (
-        <ul className="mt-4 divide-y divide-neutral-100">
-          {data.map((b) => (
-            <li key={b.botId}>
-              <Link
-                href={`/dashboard/bots/${b.botId}`}
-                className="flex items-center justify-between py-2.5 text-sm hover:text-neutral-900"
-              >
-                <span className="truncate font-medium text-neutral-700">
-                  {b.name}
-                </span>
-                <span className="ml-2 shrink-0 text-neutral-500">
-                  {b.conversationCount.toLocaleString()} conv.
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <Card>
+      <CardHeader>
+        <h3 className="text-sm font-semibold tracking-tight text-ink">
+          Most active bots
+        </h3>
+      </CardHeader>
+      <CardBody>
+        {data.length === 0 ? (
+          <p className="text-sm text-faint">No bots yet.</p>
+        ) : (
+          <ul className="-my-1 divide-y divide-hairline">
+            {data.map((b) => (
+              <li key={b.botId}>
+                <Link
+                  href={`/dashboard/bots/${b.botId}`}
+                  className="group flex items-center justify-between gap-3 py-3 transition-colors"
+                >
+                  <span className="truncate text-sm font-medium text-ink group-hover:text-accent">
+                    {b.name}
+                  </span>
+                  <Badge tone="neutral">
+                    {b.conversationCount.toLocaleString()} conv.
+                  </Badge>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardBody>
+    </Card>
   );
 }
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white px-6 py-16 text-center">
-      <h3 className="text-lg font-medium text-neutral-900">No activity yet</h3>
-      <p className="mt-1 max-w-sm text-sm text-neutral-500">
-        Once you create a bot and start having conversations, your analytics
-        will show up here.
-      </p>
-      <Link
-        href="/dashboard/bots"
-        className="mt-5 rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-      >
-        Create a bot
-      </Link>
-    </div>
+    <Card>
+      <CardBody className="flex flex-col items-center justify-center px-6 py-20 text-center">
+        <h3 className="text-lg font-semibold tracking-tight text-ink">
+          No activity yet
+        </h3>
+        <p className="mt-2 max-w-sm text-sm text-muted">
+          Once you create a bot and start having conversations, your analytics
+          will show up here.
+        </p>
+        <ButtonLink href="/dashboard/bots" variant="primary" size="md" className="mt-6">
+          Create a bot
+        </ButtonLink>
+      </CardBody>
+    </Card>
   );
 }
 
 function Unavailable() {
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-      Analytics unavailable (is the database configured?)
-    </div>
+    <Card>
+      <CardBody className="flex items-center gap-3 text-sm text-muted">
+        <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-[color:var(--warning)]" />
+        Analytics unavailable (is the database configured?)
+      </CardBody>
+    </Card>
   );
 }
 
@@ -166,10 +194,10 @@ export default async function DashboardPage() {
 
   const header = (
     <div>
-      <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">
-        Analytics
-      </h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h1 className="text-3xl font-semibold tracking-tight text-ink">
+        Overview
+      </h1>
+      <p className="mt-2 text-sm text-muted">
         An overview of your bots and conversations.
       </p>
     </div>
@@ -177,7 +205,7 @@ export default async function DashboardPage() {
 
   if (failed || !stats) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {header}
         <Unavailable />
       </div>
@@ -191,7 +219,7 @@ export default async function DashboardPage() {
 
   if (isEmpty) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {header}
         <EmptyState />
       </div>
@@ -199,7 +227,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {header}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
