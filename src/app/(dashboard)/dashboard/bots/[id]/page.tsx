@@ -130,9 +130,17 @@ export default function EditBotPage({
         &larr; Back to bots
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-        Edit bot
-      </h1>
+      <div className="mt-4 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          Edit bot
+        </h1>
+        <Link
+          href={`/dashboard/bots/${id}/playground`}
+          className="inline-flex h-9 items-center rounded-md border border-zinc-300 px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+        >
+          Test in playground
+        </Link>
+      </div>
 
       <form onSubmit={handleSave} className="mt-8 space-y-6">
         <div>

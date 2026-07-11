@@ -36,6 +36,18 @@ export default async function DashboardLayout({
           >
             Bots
           </Link>
+          <Link
+            href="/dashboard/conversations"
+            className="block rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100"
+          >
+            Conversations
+          </Link>
+          <Link
+            href="/dashboard/settings"
+            className="block rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100"
+          >
+            Settings
+          </Link>
         </nav>
         <div className="border-t border-neutral-200 p-3">
           <p className="mb-2 truncate px-3 text-xs text-neutral-500">
