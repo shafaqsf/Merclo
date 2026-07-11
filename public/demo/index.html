@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!--
+  Demo storefront page for local widget testing.
+
+  This file STUBS a Shopify product page so the Merclo chat widget can be
+  exercised locally. It is NOT a real Shopify theme: the storefront endpoints
+  the browser-side tools call (/cart.js, /cart/add.js, /cart/change.js,
+  /search/suggest.json, /products.json, /discount/*) do not exist here, so
+  those tools will return { error: ... }. That is expected. The get_page_context
+  tool WILL work because it reads the JSON-LD / og: meta tags below.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aurora Wool Runner — Demo Store</title>
+
+    <!-- Open Graph fallback for get_page_context -->
+    <meta property="og:type" content="product" />
+    <meta property="og:title" content="Aurora Wool Runner" />
+    <meta
+      property="og:description"
+      content="Lightweight merino wool sneakers built for all-day comfort."
+    />
+    <meta property="product:price:amount" content="98.00" />
+    <meta property="product:price:currency" content="USD" />
+    <meta property="product:availability" content="in stock" />
+
+    <!-- Realistic Shopify-style JSON-LD Product block -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Aurora Wool Runner",
+        "sku": "AWR-001",
+        "description": "Lightweight merino wool sneakers built for all-day comfort.",
+        "brand": { "@type": "Brand", "name": "Demo Store" },
+        "image": "https://cdn.example.com/aurora-wool-runner.jpg",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://demo.example.com/products/aurora-wool-runner",
+          "priceCurrency": "USD",
+          "price": "98.00",
+          "availability": "https://schema.org/InStock"
+        }
+      }
+    </script>
+
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        margin: 0;
+        color: #111827;
+        background: #fff;
+      }
+      header {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 16px 24px;
+        font-weight: 700;
+        font-size: 18px;
+      }
+      .product {
+        max-width: 960px;
+        margin: 40px auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        padding: 0 24px;
+      }
+      .gallery {
+        background: #f3f4f6;
+        border-radius: 12px;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        font-size: 14px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+      .price {
+        font-size: 22px;
+        margin: 0 0 16px;
+        color: #111827;
+      }
+      .desc {
+        line-height: 1.6;
+        color: #374151;
+      }
+      .buy {
+        margin-top: 24px;
+        background: #111827;
+        color: #fff;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      @media (max-width: 720px) {
+        .product {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>Demo Store</header>
+
+    <main class="product" itemscope itemtype="https://schema.org/Product">
+      <div class="gallery">Product image</div>
+      <div class="details">
+        <h1 itemprop="name">Aurora Wool Runner</h1>
+        <p class="price">
+          <span itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            $<span itemprop="price">98.00</span>
+            <meta itemprop="priceCurrency" content="USD" />
+          </span>
+        </p>
+        <p class="desc" itemprop="description">
+          Lightweight merino wool sneakers built for all-day comfort. Naturally
+          breathable, machine washable, and made for the everyday commute.
+        </p>
+        <button class="buy" type="button">Add to cart</button>
+      </div>
+    </main>
+
+    <!-- Load the Merclo chat widget -->
+    <script src="/widget.js" data-bot-id="demo-bot" defer></script>
+  </body>
+</html>
