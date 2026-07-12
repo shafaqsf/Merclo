@@ -27,7 +27,16 @@ export function buildCopilotAgent(opts: {
 }): Agent {
   const model =
     opts.model ??
-    new OpenAIChatCompletionsModel(createOpenRouterClient(), getAgentModel());
+    new OpenAIChatCompletionsModel(
+      // `@openai/agents-openai` bundles its own nested `openai` package version,
+      // so our app's `OpenAI` client instance (same runtime chat.completions
+      // shape) isn't structurally assignable to the constructor's nominal type.
+      // Cast through the constructor's own expected param type.
+      createOpenRouterClient() as unknown as ConstructorParameters<
+        typeof OpenAIChatCompletionsModel
+      >[0],
+      getAgentModel()
+    );
 
   return new Agent({
     name: "Merclo Copilot",

@@ -5,7 +5,7 @@
  *
  * SCOPE: no account-level tools exist here by design.
  */
-import { tool, type Tool } from "@openai/agents";
+import { tool, type FunctionTool } from "@openai/agents";
 import { z } from "zod";
 import type { CopilotMode } from "@/lib/db/copilot-conversations";
 import {
@@ -30,7 +30,14 @@ import { getDashboardStats } from "@/lib/db/analytics";
 /** JSON-stringify any tool result; tool outputs are strings for the model. */
 const out = (v: unknown): string => JSON.stringify(v ?? null);
 
-export function buildCopilotTools(mode: CopilotMode): Tool[] {
+// Every tool here is built via `tool()`, which always returns a FunctionTool
+// (never the ComputerTool/HostedTool members of the SDK's broader `Tool`
+// union) — narrowing the return type here keeps `.needsApproval`/`.invoke`
+// directly accessible to consumers (e.g. tests) without casts.
+export function buildCopilotTools(
+  mode: CopilotMode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous tool parameter/result shapes; `any` here matches the SDK's own `Tool` union usage.
+): FunctionTool<unknown, any, any>[] {
   const approve = mode === "accept"; // mutating tools need approval in accept mode
 
   return [
