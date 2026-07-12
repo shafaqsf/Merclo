@@ -4,11 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-type IconName = "overview" | "bots" | "conversations" | "analytics" | "settings";
+type IconName =
+  | "overview"
+  | "docs"
+  | "bots"
+  | "conversations"
+  | "analytics"
+  | "settings";
 
 const LINKS: { href: string; label: string; icon: IconName; exact?: boolean }[] =
   [
     { href: "/dashboard", label: "Overview", icon: "overview", exact: true },
+    { href: "/dashboard/docs", label: "Docs", icon: "docs" },
     { href: "/dashboard/bots", label: "Bots", icon: "bots" },
     {
       href: "/dashboard/conversations",
@@ -38,6 +45,14 @@ function Icon({ name }: { name: IconName }) {
           <rect x="14" y="3" width="7" height="5" rx="1.5" />
           <rect x="14" y="12" width="7" height="9" rx="1.5" />
           <rect x="3" y="16" width="7" height="5" rx="1.5" />
+        </svg>
+      );
+    case "docs":
+      return (
+        <svg {...common}>
+          <path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 17.5z" />
+          <path d="M4 17.5A1.5 1.5 0 0 1 5.5 16H19" />
+          <path d="M8 7h7M8 10.5h7" />
         </svg>
       );
     case "bots":
