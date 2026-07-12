@@ -27,7 +27,7 @@ export default async function DashboardLayout({
     <CopilotProvider>
       <div className="flex min-h-screen bg-background text-foreground">
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
-          <div className="px-6 py-6">
+          <div className="flex h-16 items-center border-b border-sidebar-border px-6">
             <Link href="/dashboard" className="flex items-center gap-2.5">
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-[15px] font-semibold text-primary-foreground">
                 M

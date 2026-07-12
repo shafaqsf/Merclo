@@ -90,7 +90,7 @@ export default function CopilotPanel() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-80 shrink-0 flex-col border-l border-border bg-card text-card-foreground xl:flex">
-      <header className="flex items-center justify-between border-b border-border px-4 py-3">
+      <header className="flex h-16 items-center justify-between border-b border-border px-4">
         <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Sparkles className="h-4 w-4" /> Copilot
         </span>
