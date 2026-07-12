@@ -138,6 +138,22 @@ export async function getConversationForOwner(
   return data ? mapRowToConversation(data as Record<string, unknown>) : null;
 }
 
+/**
+ * Delete a conversation the signed-in user owns. Confirms ownership via
+ * getConversationForOwner (RLS-scoped) before deleting; returns false if the
+ * conversation isn't visible to this user. The delete itself uses the admin
+ * client because conversations have no owner DELETE RLS policy.
+ */
+export async function deleteConversationForOwner(id: string): Promise<boolean> {
+  const owned = await getConversationForOwner(id);
+  if (!owned) return false;
+
+  const supabase = createAdminSupabase();
+  const { error } = await supabase.from("conversations").delete().eq("id", id);
+  if (error) throw new Error(`Failed to delete conversation: ${error.message}`);
+  return true;
+}
+
 export async function createConversation(botId: string): Promise<Conversation> {
   const supabase = createAdminSupabase();
   const { data, error } = await supabase
