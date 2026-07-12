@@ -28,7 +28,36 @@
 
   var BOT_ID = currentScript.getAttribute("data-bot-id") || "";
   var TURN_ENDPOINT = APP_URL + "/api/chat/turn";
+  var CONFIG_ENDPOINT = APP_URL + "/api/bots/" + BOT_ID + "/config";
+  var FEEDBACK_ENDPOINT = APP_URL + "/api/feedback";
   var MAX_TOOL_ROUNDS = 8;
+
+  // Sensible defaults; overwritten by GET /api/bots/:id/config on init. Kept in
+  // sync with src/lib/bots/appearance.ts DEFAULT_APPEARANCE.
+  var APPEARANCE = {
+    accent: "#0071e3",
+    position: "right",
+    launcher: "chat",
+    title: "Chat with us",
+    subtitle: "Typically replies in a few seconds",
+    greeting: "Hi! How can I help you with your shopping today?",
+    quickReplies: [],
+    showProductCards: true,
+    proactive: { enabled: false, delayMs: 8000, message: "👋 Need a hand finding something?" },
+  };
+
+  var LAUNCHER_ICONS = {
+    chat:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"' +
+      ' stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    sparkle:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"' +
+      ' stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5 10.1 7.6 12 3z"/></svg>',
+    cart:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"' +
+      ' stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>' +
+      '<path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>',
+  };
 
   // ==========================================================================
   // Tool executors (run in the browser against the Shopify storefront).
@@ -268,12 +297,16 @@
     ":host { all: initial; }",
     "*, *::before, *::after { box-sizing: border-box; }",
     ".mc-root { position: fixed; bottom: 24px; right: 24px; z-index: 2147483000;",
+    "  --mc-accent: #0071e3;",
     "  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
     "  -webkit-font-smoothing: antialiased; }",
+    // ---- Left-hand positioning ----
+    ".mc-root.mc-left { right: auto; left: 24px; }",
+    ".mc-root.mc-left .mc-panel { right: auto; left: 0; }",
 
     // ---- Floating launcher ----
     ".mc-btn { width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;",
-    "  background: #0071e3; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.18);",
+    "  background: var(--mc-accent); color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.18);",
     "  display: flex; align-items: center; justify-content: center;",
     "  transition: transform .2s ease, background .2s ease; }",
     ".mc-btn:hover { transform: scale(1.06); background: #0077ed; }",
@@ -307,7 +340,7 @@
     "  background: #ffffff; }",
     ".mc-msg { max-width: 78%; padding: 9px 14px; border-radius: 20px; font-size: 15px; line-height: 1.4;",
     "  white-space: pre-wrap; word-wrap: break-word; letter-spacing: -0.01em; }",
-    ".mc-user { align-self: flex-end; background: #0071e3; color: #fff; border-bottom-right-radius: 6px; }",
+    ".mc-user { align-self: flex-end; background: var(--mc-accent); color: #fff; border-bottom-right-radius: 6px; }",
     ".mc-bot { align-self: flex-start; background: #f5f5f5; color: #1d1d1f; border-bottom-left-radius: 6px; }",
     ".mc-error { align-self: flex-start; background: #fdecea; color: #b3261e; border-bottom-left-radius: 6px; }",
 
@@ -325,14 +358,52 @@
     "  outline: none; font-family: inherit; color: #1d1d1f; background: #ffffff;",
     "  transition: border-color .15s ease, box-shadow .15s ease; }",
     ".mc-input::placeholder { color: #6e6e73; }",
-    ".mc-input:focus { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }",
+    ".mc-input:focus { border-color: var(--mc-accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }",
     ".mc-input:disabled { opacity: .55; }",
-    ".mc-send { flex: none; border: none; background: #0071e3; color: #fff; border-radius: 50%;",
+    ".mc-send { flex: none; border: none; background: var(--mc-accent); color: #fff; border-radius: 50%;",
     "  width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center;",
     "  transition: background .15s ease, transform .15s ease; }",
     ".mc-send svg { width: 20px; height: 20px; }",
     ".mc-send:hover:not(:disabled) { background: #0077ed; transform: scale(1.05); }",
     ".mc-send:disabled { opacity: .4; cursor: default; }",
+
+    // ---- Quick replies ----
+    ".mc-quick { align-self: flex-start; display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px; }",
+    ".mc-chip { border: 1px solid var(--mc-accent); color: var(--mc-accent); background: transparent;",
+    "  border-radius: 16px; padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer;",
+    "  font-family: inherit; transition: background .15s ease, color .15s ease; }",
+    ".mc-chip:hover { background: var(--mc-accent); color: #fff; }",
+
+    // ---- Product cards ----
+    ".mc-products { align-self: flex-start; display: flex; flex-direction: column; gap: 8px; width: 82%; }",
+    ".mc-card { border: 1px solid rgba(0,0,0,0.10); border-radius: 14px; overflow: hidden; background: #fff; }",
+    ".mc-card-img { width: 100%; height: 120px; object-fit: cover; display: block; background: #f5f5f5; }",
+    ".mc-card-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }",
+    ".mc-card-title { font-size: 14px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; }",
+    ".mc-card-price { font-size: 13px; color: #6e6e73; }",
+    ".mc-card-actions { display: flex; gap: 8px; align-items: center; margin-top: 2px; }",
+    ".mc-card-add { border: none; background: var(--mc-accent); color: #fff; border-radius: 16px;",
+    "  padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }",
+    ".mc-card-add:disabled { opacity: .5; cursor: default; }",
+    ".mc-card-link { font-size: 13px; color: var(--mc-accent); text-decoration: none; font-weight: 500; }",
+    ".mc-card-link:hover { text-decoration: underline; }",
+
+    // ---- Feedback ----
+    ".mc-feedback { align-self: flex-start; display: flex; gap: 4px; margin: -2px 0 4px 2px; }",
+    ".mc-fb-btn { border: none; background: transparent; cursor: pointer; font-size: 14px; line-height: 1;",
+    "  opacity: .5; padding: 2px 4px; border-radius: 6px; transition: opacity .15s ease, background .15s ease; }",
+    ".mc-fb-btn:hover { opacity: 1; background: rgba(0,0,0,0.05); }",
+    ".mc-fb-btn.mc-fb-active { opacity: 1; }",
+
+    // ---- Proactive nudge ----
+    ".mc-nudge { position: absolute; bottom: 74px; right: 0; max-width: 260px; background: #fff;",
+    "  color: #1d1d1f; padding: 12px 34px 12px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4;",
+    "  box-shadow: 0 8px 28px rgba(0,0,0,0.16); border: 1px solid rgba(0,0,0,0.08); cursor: pointer;",
+    "  opacity: 0; transform: translateY(8px); transition: opacity .24s ease, transform .24s ease; }",
+    ".mc-root.mc-left .mc-nudge { right: auto; left: 0; }",
+    ".mc-nudge.mc-visible { opacity: 1; transform: translateY(0); }",
+    ".mc-nudge-close { position: absolute; top: 6px; right: 8px; background: transparent; border: none;",
+    "  color: #6e6e73; cursor: pointer; font-size: 16px; line-height: 1; padding: 2px; }",
 
     // ---- Dark mode ----
     "@media (prefers-color-scheme: dark) {",
@@ -343,7 +414,7 @@
     "  .mc-close { color: #8e8e93; }",
     "  .mc-close:hover { background: rgba(255,255,255,0.10); color: #f5f5f7; }",
     "  .mc-list { background: #1c1c1e; }",
-    "  .mc-user { background: #0a84ff; color: #fff; }",
+    "  .mc-user { background: var(--mc-accent); color: #fff; }",
     "  .mc-bot { background: #2c2c2e; color: #f5f5f7; }",
     "  .mc-error { background: #3a2321; color: #ff9b93; }",
     "  .mc-typing { background: #2c2c2e; }",
@@ -351,17 +422,25 @@
     "  .mc-form { background: #1c1c1e; border-top-color: rgba(255,255,255,0.10); }",
     "  .mc-input { background: #2c2c2e; color: #f5f5f7; border-color: rgba(255,255,255,0.14); }",
     "  .mc-input::placeholder { color: #8e8e93; }",
-    "  .mc-input:focus { border-color: #0a84ff; box-shadow: 0 0 0 3px rgba(10,132,255,0.25); }",
-    "  .mc-btn { background: #0a84ff; }",
+    "  .mc-input:focus { border-color: var(--mc-accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.25); }",
+    "  .mc-btn { background: var(--mc-accent); }",
     "  .mc-btn:hover { background: #3d9bff; }",
-    "  .mc-send { background: #0a84ff; }",
+    "  .mc-send { background: var(--mc-accent); }",
     "  .mc-send:hover:not(:disabled) { background: #3d9bff; }",
+    "  .mc-card { background: #2c2c2e; border-color: rgba(255,255,255,0.10); }",
+    "  .mc-card-img { background: #1c1c1e; }",
+    "  .mc-card-title { color: #f5f5f7; }",
+    "  .mc-card-price { color: #8e8e93; }",
+    "  .mc-fb-btn:hover { background: rgba(255,255,255,0.10); }",
+    "  .mc-nudge { background: #2c2c2e; color: #f5f5f7; border-color: rgba(255,255,255,0.10); }",
+    "  .mc-nudge-close { color: #8e8e93; }",
     "}",
   ].join("\n");
 
-  var host, root, panel, list, input, form, sendBtn;
+  var host, root, panel, list, input, form, sendBtn, rootWrap;
   var conversationId = null;
   var busy = false;
+  var assistantMessageIndex = 0;
 
   function build() {
     host = document.createElement("div");
@@ -373,15 +452,17 @@
     root.appendChild(style);
 
     var wrap = document.createElement("div");
-    wrap.className = "mc-root";
+    wrap.className = "mc-root" + (APPEARANCE.position === "left" ? " mc-left" : "");
+    wrap.style.setProperty("--mc-accent", APPEARANCE.accent);
+    rootWrap = wrap;
 
     panel = document.createElement("div");
     panel.className = "mc-panel";
     panel.innerHTML =
       '<div class="mc-header">' +
       '<span class="mc-header-text">' +
-      '<span class="mc-title">Chat with us</span>' +
-      '<span class="mc-subtitle">Typically replies in a few seconds</span>' +
+      '<span class="mc-title"></span>' +
+      '<span class="mc-subtitle"></span>' +
       "</span>" +
       '<button class="mc-close" aria-label="Close chat">&times;</button>' +
       "</div>" +
@@ -398,14 +479,16 @@
     var btn = document.createElement("button");
     btn.className = "mc-btn";
     btn.setAttribute("aria-label", "Open chat");
-    btn.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"' +
-      ' stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+    btn.innerHTML = LAUNCHER_ICONS[APPEARANCE.launcher] || LAUNCHER_ICONS.chat;
 
     wrap.appendChild(panel);
     wrap.appendChild(btn);
     root.appendChild(wrap);
     document.body.appendChild(host);
+
+    // Apply themed header text.
+    panel.querySelector(".mc-title").textContent = APPEARANCE.title;
+    panel.querySelector(".mc-subtitle").textContent = APPEARANCE.subtitle;
 
     list = panel.querySelector(".mc-list");
     input = panel.querySelector(".mc-input");
@@ -426,11 +509,34 @@
         panel.classList.add("mc-visible");
       });
     });
+    hideNudge();
     if (!greeted) {
       greeted = true;
-      addBubble("Hi! How can I help you with your shopping today?", "mc-bot");
+      if (APPEARANCE.greeting) addBubble(APPEARANCE.greeting, "mc-bot");
+      renderQuickReplies();
     }
     input.focus();
+  }
+
+  function renderQuickReplies() {
+    var replies = APPEARANCE.quickReplies || [];
+    if (!replies.length) return;
+    var row = document.createElement("div");
+    row.className = "mc-quick";
+    replies.forEach(function (text) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "mc-chip";
+      chip.textContent = text;
+      chip.addEventListener("click", function () {
+        if (busy) return;
+        if (row.parentNode) row.parentNode.removeChild(row);
+        sendMessage(text);
+      });
+      row.appendChild(chip);
+    });
+    list.appendChild(row);
+    list.scrollTop = list.scrollHeight;
   }
 
   function closePanel() {
@@ -457,6 +563,175 @@
     list.appendChild(el);
     list.scrollTop = list.scrollHeight;
     return el;
+  }
+
+  // Render an assistant message plus a 👍/👎 feedback row. messageIndex is a
+  // monotonically increasing counter over assistant messages in this session.
+  function addAssistantMessage(text) {
+    addBubble(text || "", "mc-bot");
+    var index = assistantMessageIndex++;
+    if (!conversationId) return;
+    var row = document.createElement("div");
+    row.className = "mc-feedback";
+    var rated = false;
+    ["up", "down"].forEach(function (rating) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "mc-fb-btn";
+      b.setAttribute(
+        "aria-label",
+        rating === "up" ? "Helpful" : "Not helpful"
+      );
+      b.textContent = rating === "up" ? "👍" : "👎";
+      b.addEventListener("click", function () {
+        if (rated) return;
+        rated = true;
+        b.classList.add("mc-fb-active");
+        sendFeedback(index, rating);
+      });
+      row.appendChild(b);
+    });
+    list.appendChild(row);
+    list.scrollTop = list.scrollHeight;
+  }
+
+  function sendFeedback(messageIndex, rating) {
+    try {
+      fetch(FEEDBACK_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId: conversationId,
+          messageIndex: messageIndex,
+          rating: rating,
+        }),
+      }).catch(function () {});
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function renderProductCards(products) {
+    if (!APPEARANCE.showProductCards) return;
+    if (!Array.isArray(products) || !products.length) return;
+    var container = document.createElement("div");
+    container.className = "mc-products";
+    products.forEach(function (p) {
+      if (!p) return;
+      var card = document.createElement("div");
+      card.className = "mc-card";
+
+      if (p.image) {
+        var img = document.createElement("img");
+        img.className = "mc-card-img";
+        img.src = p.image;
+        img.alt = p.title || "";
+        img.loading = "lazy";
+        card.appendChild(img);
+      }
+
+      var body = document.createElement("div");
+      body.className = "mc-card-body";
+
+      var title = document.createElement("div");
+      title.className = "mc-card-title";
+      title.textContent = p.title || "Product";
+      body.appendChild(title);
+
+      if (p.price) {
+        var price = document.createElement("div");
+        price.className = "mc-card-price";
+        price.textContent = p.price;
+        body.appendChild(price);
+      }
+
+      var actions = document.createElement("div");
+      actions.className = "mc-card-actions";
+
+      if (p.variantId) {
+        var add = document.createElement("button");
+        add.type = "button";
+        add.className = "mc-card-add";
+        add.textContent = "Add to cart";
+        add.addEventListener("click", function () {
+          add.disabled = true;
+          add.textContent = "Adding…";
+          Promise.resolve(
+            runTool("add_to_cart", { variant_id: p.variantId, quantity: 1 })
+          ).then(function (result) {
+            var ok = result && !result.error;
+            add.textContent = ok ? "Added ✓" : "Try again";
+            add.disabled = false;
+          });
+        });
+        actions.appendChild(add);
+      }
+
+      if (p.url) {
+        var link = document.createElement("a");
+        link.className = "mc-card-link";
+        link.href = p.url;
+        link.target = "_top";
+        link.textContent = "View";
+        actions.appendChild(link);
+      }
+
+      if (actions.childNodes.length) body.appendChild(actions);
+      card.appendChild(body);
+      container.appendChild(card);
+    });
+    list.appendChild(container);
+    list.scrollTop = list.scrollHeight;
+  }
+
+  // ---- Proactive nudge ----
+  var nudgeEl = null;
+  var proactiveTimer = null;
+  function scheduleProactive() {
+    if (!APPEARANCE.proactive || !APPEARANCE.proactive.enabled) return;
+    var delay = APPEARANCE.proactive.delayMs;
+    if (typeof delay !== "number" || delay < 0) delay = 8000;
+    proactiveTimer = setTimeout(function () {
+      if (greeted || panel.classList.contains("mc-open")) return;
+      showNudge(APPEARANCE.proactive.message);
+    }, delay);
+  }
+
+  function showNudge(message) {
+    if (nudgeEl) return;
+    nudgeEl = document.createElement("div");
+    nudgeEl.className = "mc-nudge";
+    var text = document.createElement("span");
+    text.textContent = message || "";
+    var close = document.createElement("button");
+    close.className = "mc-nudge-close";
+    close.setAttribute("aria-label", "Dismiss");
+    close.innerHTML = "&times;";
+    close.addEventListener("click", function (e) {
+      e.stopPropagation();
+      hideNudge();
+    });
+    nudgeEl.appendChild(text);
+    nudgeEl.appendChild(close);
+    nudgeEl.addEventListener("click", function () {
+      hideNudge();
+      openPanel();
+    });
+    rootWrap.appendChild(nudgeEl);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        if (nudgeEl) nudgeEl.classList.add("mc-visible");
+      });
+    });
+  }
+
+  function hideNudge() {
+    if (proactiveTimer) {
+      clearTimeout(proactiveTimer);
+      proactiveTimer = null;
+    }
+    if (nudgeEl && nudgeEl.parentNode) nudgeEl.parentNode.removeChild(nudgeEl);
+    nudgeEl = null;
   }
 
   var typingEl = null;
@@ -509,7 +784,8 @@
 
       if (data.type === "message") {
         hideTyping();
-        addBubble(data.content || "", "mc-bot");
+        addAssistantMessage(data.content || "");
+        if (data.products) renderProductCards(data.products);
         return;
       }
 
@@ -554,9 +830,16 @@
     if (busy) return;
     var text = (input.value || "").trim();
     if (!text) return;
+    input.value = "";
+    await sendMessage(text);
+  }
+
+  async function sendMessage(text) {
+    if (busy) return;
+    text = (text || "").trim();
+    if (!text) return;
 
     addBubble(text, "mc-user");
-    input.value = "";
     setBusy(true);
     showTyping();
 
@@ -580,9 +863,31 @@
     }
   }
 
-  function init() {
+  function applyConfig(cfg) {
+    if (cfg && cfg.appearance && typeof cfg.appearance === "object") {
+      var a = cfg.appearance;
+      for (var k in APPEARANCE) {
+        if (Object.prototype.hasOwnProperty.call(a, k) && a[k] != null) {
+          APPEARANCE[k] = a[k];
+        }
+      }
+    }
+  }
+
+  async function loadConfig() {
+    try {
+      var res = await fetch(CONFIG_ENDPOINT);
+      if (res.ok) applyConfig(await res.json());
+    } catch (e) {
+      /* fall back to defaults so the widget still works */
+    }
+  }
+
+  async function init() {
     if (document.getElementById("merclo-chat-widget")) return;
+    await loadConfig();
     build();
+    scheduleProactive();
   }
 
   if (document.readyState === "loading") {

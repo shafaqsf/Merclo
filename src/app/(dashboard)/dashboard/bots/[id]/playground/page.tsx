@@ -12,10 +12,19 @@ import { cn } from "@/lib/cn";
 
 type Role = "user" | "assistant" | "tool" | "error";
 
+interface Product {
+  title: string;
+  price?: string;
+  image?: string;
+  url?: string;
+  variantId?: string;
+}
+
 interface TranscriptItem {
   id: string;
   role: Role;
   content: string;
+  products?: Product[];
 }
 
 interface ToolCall {
@@ -31,7 +40,12 @@ interface ToolResultPayload {
 }
 
 type TurnResponse =
-  | { type: "message"; conversationId: string; content: string }
+  | {
+      type: "message";
+      conversationId: string;
+      content: string;
+      products?: Product[];
+    }
   | { type: "tool_calls"; conversationId: string; toolCalls: ToolCall[] }
   | { error: string };
 
@@ -71,6 +85,29 @@ function asString(value: unknown, fallback = ""): string {
 
 function asNumber(value: unknown, fallback = 1): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function optString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+/** Narrow an unknown value into a Product[]; drops anything without a title. */
+function parseProducts(value: unknown): Product[] {
+  if (!Array.isArray(value)) return [];
+  const out: Product[] = [];
+  for (const raw of value) {
+    const r = asRecord(raw);
+    const title = optString(r.title);
+    if (!title) continue;
+    out.push({
+      title,
+      price: optString(r.price),
+      image: optString(r.image),
+      url: optString(r.url),
+      variantId: optString(r.variantId),
+    });
+  }
+  return out;
 }
 
 /**
@@ -192,9 +229,29 @@ export default function PlaygroundPage({
   const [pending, setPending] = useState(false);
   const conversationIdRef = useRef<string | null>(null);
   const cartRef = useRef<MockCart>(emptyCart());
+  // Feedback keyed by the transcript index of the assistant message.
+  const [feedback, setFeedback] = useState<Record<number, "up" | "down">>({});
 
-  function push(role: Role, content: string) {
-    setTranscript((prev) => [...prev, { id: nextId(), role, content }]);
+  function push(role: Role, content: string, products?: Product[]) {
+    setTranscript((prev) => [
+      ...prev,
+      { id: nextId(), role, content, products },
+    ]);
+  }
+
+  async function sendFeedback(messageIndex: number, rating: "up" | "down") {
+    const conversationId = conversationIdRef.current;
+    if (!conversationId) return;
+    setFeedback((prev) => ({ ...prev, [messageIndex]: rating }));
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId, messageIndex, rating }),
+      });
+    } catch {
+      // Optimistic — leave the selection; a failed POST is non-critical here.
+    }
   }
 
   async function postTurn(
@@ -248,7 +305,7 @@ export default function PlaygroundPage({
 
       if (response.type === "message") {
         conversationIdRef.current = response.conversationId;
-        push("assistant", response.content);
+        push("assistant", response.content, parseProducts(response.products));
         return;
       }
 
@@ -319,7 +376,7 @@ export default function PlaygroundPage({
             </p>
           )}
 
-          {transcript.map((item) => {
+          {transcript.map((item, messageIndex) => {
             if (item.role === "tool") {
               return (
                 <div key={item.id} className="flex justify-center">
@@ -339,10 +396,14 @@ export default function PlaygroundPage({
               );
             }
             const isUser = item.role === "user";
+            const vote = feedback[messageIndex];
             return (
               <div
                 key={item.id}
-                className={cn("flex", isUser ? "justify-end" : "justify-start")}
+                className={cn(
+                  "flex flex-col gap-2",
+                  isUser ? "items-end" : "items-start"
+                )}
               >
                 <div
                   className={cn(
@@ -354,6 +415,47 @@ export default function PlaygroundPage({
                 >
                   {item.content}
                 </div>
+
+                {!isUser && item.products && item.products.length > 0 && (
+                  <div className="grid w-full max-w-[80%] grid-cols-1 gap-2 sm:grid-cols-2">
+                    {item.products.map((p, i) => (
+                      <ProductCard key={`${item.id}-p${i}`} product={p} />
+                    ))}
+                  </div>
+                )}
+
+                {item.role === "assistant" && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      aria-label="Helpful"
+                      aria-pressed={vote === "up"}
+                      onClick={() => sendFeedback(messageIndex, "up")}
+                      className={cn(
+                        "grid h-7 w-7 place-items-center rounded-full text-sm transition-colors",
+                        vote === "up"
+                          ? "bg-accent-soft text-accent"
+                          : "text-faint hover:bg-surface-2 hover:text-muted"
+                      )}
+                    >
+                      👍
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Not helpful"
+                      aria-pressed={vote === "down"}
+                      onClick={() => sendFeedback(messageIndex, "down")}
+                      className={cn(
+                        "grid h-7 w-7 place-items-center rounded-full text-sm transition-colors",
+                        vote === "down"
+                          ? "bg-danger-soft text-danger"
+                          : "text-faint hover:bg-surface-2 hover:text-muted"
+                      )}
+                    >
+                      👎
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -393,4 +495,42 @@ export default function PlaygroundPage({
       </Card>
     </div>
   );
+}
+
+/* ------------------------------------------------------------------ *
+ * Product card
+ * ------------------------------------------------------------------ */
+
+function ProductCard({ product }: { product: Product }) {
+  const body = (
+    <div className="flex gap-3 overflow-hidden rounded-xl border border-hairline bg-surface p-2.5 shadow-[var(--shadow-sm)] transition-colors hover:bg-surface-2">
+      {product.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={product.image}
+          alt={product.title}
+          className="h-14 w-14 shrink-0 rounded-lg object-cover"
+        />
+      ) : (
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-surface-2 text-faint">
+          🛍️
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-ink">{product.title}</p>
+        {product.price && (
+          <p className="mt-0.5 text-sm text-muted">{product.price}</p>
+        )}
+      </div>
+    </div>
+  );
+
+  if (product.url) {
+    return (
+      <a href={product.url} target="_blank" rel="noopener noreferrer">
+        {body}
+      </a>
+    );
+  }
+  return body;
 }
