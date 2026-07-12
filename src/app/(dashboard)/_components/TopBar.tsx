@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import CommandPalette from "./CommandPalette";
 import Notifications from "./Notifications";
 
-export default function TopBar({ userEmail }: { userEmail: string }) {
+export default function TopBar() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-
-  const initial = (userEmail.trim()[0] ?? "U").toUpperCase();
 
   // Global ⌘K / Ctrl+K to toggle the command palette.
   useEffect(() => {
@@ -22,15 +20,13 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const name = userEmail.split("@")[0] || "Account";
-
   return (
-    <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/70 backdrop-blur-2xl backdrop-saturate-150">
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-3 px-6 sm:px-10">
         <button
           type="button"
           onClick={() => setPaletteOpen(true)}
-          className="group flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-hairline bg-surface px-4 text-sm text-faint transition-colors hover:border-hairline-strong hover:text-muted sm:max-w-md"
+          className="glass-panel glass-interactive group flex h-10 min-w-0 flex-1 items-center gap-2.5 !rounded-xl px-4 text-sm text-faint hover:border-hairline-strong hover:text-muted sm:max-w-md"
         >
           <svg
             className="h-4 w-4 shrink-0"
@@ -55,7 +51,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
               type="button"
               aria-label="Notifications"
               onClick={() => setNotifOpen((v) => !v)}
-              className="relative grid h-10 w-10 place-items-center rounded-xl border border-hairline bg-surface text-muted transition-colors hover:text-ink"
+              className="glass-panel glass-interactive relative grid h-10 w-10 place-items-center !rounded-xl text-muted hover:text-ink"
             >
               <svg
                 className="h-[18px] w-[18px]"
@@ -83,16 +79,13 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
             />
           </div>
 
-          <div
-            className="flex items-center gap-2.5 rounded-xl border border-hairline bg-surface py-1.5 pl-1.5 pr-3"
-            title={userEmail}
-          >
+          <div className="glass-panel flex items-center gap-2.5 !rounded-xl py-1.5 pl-1.5 pr-3">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-ink">
-              {initial}
+              M
             </span>
             <span className="hidden leading-tight sm:block">
-              <span className="block max-w-[10rem] truncate text-[13px] font-semibold capitalize text-ink">
-                {name}
+              <span className="block max-w-[10rem] truncate text-[13px] font-semibold text-ink">
+                Merclo
               </span>
               <span className="block text-[11px] text-faint">Owner</span>
             </span>

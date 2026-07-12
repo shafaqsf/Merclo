@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 
 const fieldBase =
-  "w-full rounded-xl border border-hairline bg-surface-2 px-3.5 py-2.5 text-sm " +
+  "w-full rounded-xl border border-hairline bg-[color:var(--glass-bg)] px-3.5 py-2.5 text-sm backdrop-blur-md " +
   "text-ink placeholder:text-faint transition-colors outline-none " +
   "focus:border-accent focus:bg-surface";
 

@@ -79,7 +79,7 @@ export default function Notifications({
   return (
     <div
       ref={panelRef}
-      className="absolute right-0 top-full z-40 mt-2 w-80 overflow-hidden rounded-2xl border border-hairline bg-surface shadow-[var(--shadow-lg)]"
+      className="glass-panel-strong absolute right-0 top-full z-40 mt-2 w-80 overflow-hidden"
       role="menu"
       aria-label="Recent activity"
     >

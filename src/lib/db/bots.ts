@@ -1,12 +1,12 @@
 /**
  * Data access for `public.bots`.
  *
- * The mutating/list/get helpers run through the cookie-bound server client, so
- * they are scoped to the signed-in merchant by RLS. `getBotForRuntime` uses the
- * service-role client for the public chat endpoint, where there is no user JWT.
+ * Single-tenant, no-auth app: every helper runs through the service-role
+ * client (RLS no longer scopes anything), and all rows are attributed to the
+ * fixed `DEFAULT_OWNER_ID`.
  */
-import { createServerSupabase } from "@/lib/supabase/server";
 import { createAdminSupabase } from "@/lib/supabase/admin";
+import { DEFAULT_OWNER_ID } from "@/lib/db/constants";
 
 export interface Bot {
   id: string;
@@ -76,7 +76,7 @@ export function mapRowToBot(row: Record<string, unknown>): Bot {
 }
 
 export async function listBots(): Promise<Bot[]> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("bots")
     .select(BOT_COLUMNS)
@@ -87,7 +87,7 @@ export async function listBots(): Promise<Bot[]> {
 }
 
 export async function getBot(id: string): Promise<Bot | null> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("bots")
     .select(BOT_COLUMNS)
@@ -99,17 +99,10 @@ export async function getBot(id: string): Promise<Bot | null> {
 }
 
 export async function createBot(input: CreateBotInput): Promise<Bot> {
-  const supabase = await createServerSupabase();
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError) throw new Error(`Failed to resolve user: ${userError.message}`);
-  if (!user) throw new Error("Not authenticated.");
+  const supabase = createAdminSupabase();
 
   const insert = {
-    owner_id: user.id,
+    owner_id: DEFAULT_OWNER_ID,
     name: input.name,
     persona: input.persona ?? "",
     allowed_tools: input.allowed_tools ?? [],
@@ -127,7 +120,7 @@ export async function createBot(input: CreateBotInput): Promise<Bot> {
 }
 
 export async function updateBot(id: string, patch: UpdateBotPatch): Promise<Bot> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
 
   const update: Record<string, unknown> = {};
   if (patch.name !== undefined) update.name = patch.name;
@@ -151,24 +144,16 @@ export async function updateBot(id: string, patch: UpdateBotPatch): Promise<Bot>
 }
 
 export async function deleteBot(id: string): Promise<void> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { error } = await supabase.from("bots").delete().eq("id", id);
   if (error) throw new Error(`Failed to delete bot: ${error.message}`);
 }
 
 /**
- * Read a bot by id using the service-role client. Used by the public chat
- * endpoint, which has no merchant JWT but still needs the bot's persona and
- * allow-lists to run the agent.
+ * Read a bot by id. Used by the public chat endpoint, which needs the bot's
+ * persona and allow-lists to run the agent. Kept as a distinct export for
+ * callers that want to be explicit about the runtime read path.
  */
 export async function getBotForRuntime(id: string): Promise<Bot | null> {
-  const supabase = createAdminSupabase();
-  const { data, error } = await supabase
-    .from("bots")
-    .select(BOT_COLUMNS)
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error) throw new Error(`Failed to load bot for runtime: ${error.message}`);
-  return data ? mapRowToBot(data as Record<string, unknown>) : null;
+  return getBot(id);
 }

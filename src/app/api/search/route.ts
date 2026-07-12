@@ -1,10 +1,9 @@
 /**
- * GET /api/search?q= — owner-scoped search for the dashboard command palette.
- * Returns matching bots and recent conversations for the signed-in merchant.
- * Reads go through the cookie-bound client (RLS-scoped).
+ * GET /api/search?q= — search for the dashboard command palette. Returns
+ * matching bots and recent conversations (single-tenant: there is only one
+ * owner, so no scoping is needed).
  */
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerSupabase } from "@/lib/supabase/server";
 import { listBots } from "@/lib/db/bots";
 import { listConversationsForOwner } from "@/lib/db/conversations";
 
@@ -19,14 +18,6 @@ export interface SearchResult {
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const supabase = await createServerSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
-  }
-
   const q = (request.nextUrl.searchParams.get("q") ?? "").trim().toLowerCase();
 
   const [bots, conversations] = await Promise.all([

@@ -7,16 +7,16 @@ type Size = "sm" | "md" | "lg";
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-full font-medium " +
-  "transition-all duration-200 active:scale-[0.98] disabled:opacity-40 " +
-  "disabled:pointer-events-none whitespace-nowrap select-none";
+  "transition-all duration-200 ease-out active:scale-[0.96] hover:scale-[1.02] disabled:opacity-40 " +
+  "disabled:pointer-events-none disabled:hover:scale-100 disabled:active:scale-100 whitespace-nowrap select-none";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-accent text-accent-ink hover:bg-accent-hover shadow-[0_1px_2px_rgba(0,0,0,0.08)]",
+    "bg-accent text-accent-ink hover:bg-accent-hover shadow-[var(--shadow-glass-sm)] hover:shadow-[var(--shadow-glass-md)]",
   secondary:
-    "bg-surface text-ink border border-hairline hover:bg-surface-2 hover:border-hairline-strong",
+    "glass-panel text-ink hover:bg-[var(--glass-bg-strong)]",
   ghost: "text-accent hover:bg-accent-soft",
-  danger: "bg-danger text-white hover:opacity-90",
+  danger: "bg-danger text-white hover:opacity-90 shadow-[var(--shadow-glass-sm)]",
 };
 
 const sizes: Record<Size, string> = {

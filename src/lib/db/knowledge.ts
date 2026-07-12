@@ -1,11 +1,9 @@
 /**
  * Data access for `public.knowledge_sources`.
  *
- * CRUD runs through the cookie-bound server client (RLS-scoped to the owner via
- * the bot relationship). `searchKnowledge` runs through the admin client because
- * it is called from the public chat runtime, which has no merchant JWT.
+ * Single-tenant, no-auth app: every helper runs through the service-role
+ * client.
  */
-import { createServerSupabase } from "@/lib/supabase/server";
 import { createAdminSupabase } from "@/lib/supabase/admin";
 
 export type KnowledgeKind = "faq" | "policy" | "note";
@@ -45,7 +43,7 @@ function mapRow(row: Record<string, unknown>): KnowledgeSource {
 }
 
 export async function listKnowledge(botId: string): Promise<KnowledgeSource[]> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("knowledge_sources")
     .select(COLUMNS)
@@ -61,7 +59,7 @@ export async function createKnowledge(input: {
   content: string;
   kind?: KnowledgeKind;
 }): Promise<KnowledgeSource> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("knowledge_sources")
     .insert({
@@ -80,7 +78,7 @@ export async function updateKnowledge(
   id: string,
   patch: { title?: string; content?: string; kind?: KnowledgeKind }
 ): Promise<KnowledgeSource> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (patch.title !== undefined) update.title = patch.title;
   if (patch.content !== undefined) update.content = patch.content;
@@ -96,7 +94,7 @@ export async function updateKnowledge(
 }
 
 export async function deleteKnowledge(id: string): Promise<void> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { error } = await supabase.from("knowledge_sources").delete().eq("id", id);
   if (error) throw new Error(`Failed to delete knowledge: ${error.message}`);
 }

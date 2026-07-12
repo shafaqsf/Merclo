@@ -1,12 +1,11 @@
 /**
  * Data access for `public.conversations`.
  *
- * Conversations have no anon RLS policy, so every helper here runs through the
- * service-role client and must only be called from server code (the chat
- * runtime / route handlers).
+ * Single-tenant, no-auth app: every helper runs through the service-role
+ * client and must only be called from server code (the chat runtime / route
+ * handlers).
  */
 import { createAdminSupabase } from "@/lib/supabase/admin";
-import { createServerSupabase } from "@/lib/supabase/server";
 
 /**
  * A single item in a conversation's history. This is an OpenAI Agents SDK item
@@ -89,12 +88,11 @@ function toSummary(c: Conversation): ConversationSummary {
 }
 
 /**
- * List conversation summaries for every bot owned by the signed-in merchant.
- * Uses the cookie-bound client, so RLS scopes rows to the owner (see the
- * "owners read their bots' conversations" policy).
+ * List conversation summaries for every bot (single-tenant: there is only
+ * one owner).
  */
 export async function listConversationsForOwner(): Promise<ConversationSummary[]> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("conversations")
     .select(CONVERSATION_COLUMNS)
@@ -108,7 +106,7 @@ export async function listConversationsForOwner(): Promise<ConversationSummary[]
 
 /** Full conversations (with messages) for the owner — for analytics scans. */
 export async function listConversationsWithMessagesForOwner(): Promise<Conversation[]> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("conversations")
     .select(CONVERSATION_COLUMNS)
@@ -121,13 +119,13 @@ export async function listConversationsWithMessagesForOwner(): Promise<Conversat
 }
 
 /**
- * Load a single conversation the signed-in merchant owns (full transcript).
- * Returns null if it doesn't exist or isn't visible to this user (RLS).
+ * Load a single conversation (full transcript) by id.
+ * Returns null if it doesn't exist.
  */
 export async function getConversationForOwner(
   id: string
 ): Promise<Conversation | null> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("conversations")
     .select(CONVERSATION_COLUMNS)
