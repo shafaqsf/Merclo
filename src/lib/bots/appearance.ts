@@ -7,11 +7,19 @@
 
 export type WidgetPosition = "right" | "left";
 export type LauncherIcon = "chat" | "sparkle" | "cart";
+export type ThemeShape = "rounded" | "sharp";
+export type ThemeDensity = "compact" | "spacious";
+export type DarkModeSetting = "auto" | "light" | "dark";
 
 export interface ProactiveConfig {
   enabled: boolean;
   delayMs: number;
   message: string;
+}
+
+export interface ThemeConfig {
+  shape: ThemeShape;
+  density: ThemeDensity;
 }
 
 export interface WidgetAppearance {
@@ -24,6 +32,9 @@ export interface WidgetAppearance {
   quickReplies: string[];
   showProductCards: boolean;
   proactive: ProactiveConfig;
+  avatarUrl: string; // "" = none, else https URL
+  theme: ThemeConfig;
+  darkMode: DarkModeSetting;
 }
 
 export const DEFAULT_APPEARANCE: WidgetAppearance = {
@@ -36,10 +47,22 @@ export const DEFAULT_APPEARANCE: WidgetAppearance = {
   quickReplies: [],
   showProductCards: true,
   proactive: { enabled: false, delayMs: 8000, message: "👋 Need a hand finding something?" },
+  avatarUrl: "",
+  theme: { shape: "rounded", density: "spacious" },
+  darkMode: "auto",
 };
 
 function isHexColor(v: unknown): v is string {
   return typeof v === "string" && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
+}
+
+function isHttpsUrl(v: unknown): v is string {
+  if (typeof v !== "string" || v === "" || v.length > 2048) return false;
+  try {
+    return new URL(v).protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function str(v: unknown, fallback: string): string {
@@ -76,6 +99,13 @@ export function resolveAppearance(raw: unknown): WidgetAppearance {
     ? r.proactive
     : {}) as Record<string, unknown>;
 
+  const t = (r.theme && typeof r.theme === "object" ? r.theme : {}) as Record<string, unknown>;
+  const shape: ThemeShape = t.shape === "sharp" ? "sharp" : "rounded";
+  const density: ThemeDensity = t.density === "compact" ? "compact" : "spacious";
+
+  const darkMode: DarkModeSetting =
+    r.darkMode === "light" || r.darkMode === "dark" ? r.darkMode : "auto";
+
   return {
     accent: isHexColor(r.accent) ? r.accent : d.accent,
     position,
@@ -93,5 +123,8 @@ export function resolveAppearance(raw: unknown): WidgetAppearance {
           : d.proactive.delayMs,
       message: str(p.message, d.proactive.message),
     },
+    avatarUrl: r.avatarUrl === "" || isHttpsUrl(r.avatarUrl) ? (r.avatarUrl as string) : d.avatarUrl,
+    theme: { shape, density },
+    darkMode,
   };
 }

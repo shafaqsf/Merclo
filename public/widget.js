@@ -44,6 +44,9 @@
     quickReplies: [],
     showProductCards: true,
     proactive: { enabled: false, delayMs: 8000, message: "👋 Need a hand finding something?" },
+    avatarUrl: "",
+    theme: { shape: "rounded", density: "spacious" },
+    darkMode: "auto",
   };
 
   var LAUNCHER_ICONS = {
@@ -293,6 +296,55 @@
   // UI (Shadow DOM)
   // ==========================================================================
 
+  // Each entry is [selector, declarations]; declarations are scoped under
+  // the shadow root wrapper, i.e. compiled as ".mc-root[...] " + selector.
+  var DARK_RULES = [
+    [".mc-panel", "background: rgba(28,28,30,0.78); border-color: rgba(255,255,255,0.12); box-shadow: 0 20px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);"],
+    [".mc-header", "background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent); border-bottom-color: rgba(255,255,255,0.1);"],
+    [".mc-title", "color: #f5f5f7;"],
+    [".mc-subtitle", "color: #8e8e93;"],
+    [".mc-close", "color: #8e8e93;"],
+    [".mc-close:hover", "background: rgba(255,255,255,0.10); color: #f5f5f7;"],
+    [".mc-list", "background: transparent;"],
+    [".mc-user", "background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 60%), var(--mc-accent); color: #fff;"],
+    [".mc-bot", "background: rgba(120,120,128,0.24); color: #f5f5f7;"],
+    [".mc-error", "background: #3a2321; color: #ff9b93;"],
+    [".mc-typing", "background: rgba(120,120,128,0.24);"],
+    [".mc-dot", "background: #636366;"],
+    [".mc-form", "background: rgba(28,28,30,0.5); border-top-color: rgba(255,255,255,0.1);"],
+    [".mc-input", "background: rgba(44,44,46,0.7); color: #f5f5f7; border-color: rgba(255,255,255,0.14);"],
+    [".mc-input::placeholder", "color: #8e8e93;"],
+    [".mc-input:focus", "border-color: var(--mc-accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.25);"],
+    [".mc-btn", "background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent 60%), var(--mc-accent);"],
+    [".mc-btn:hover", "background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent 60%), #3d9bff;"],
+    [".mc-send", "background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent 60%), var(--mc-accent);"],
+    [".mc-send:hover:not(:disabled)", "background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent 60%), #3d9bff;"],
+    [".mc-card", "background: rgba(44,44,46,0.6); border-color: rgba(255,255,255,0.1);"],
+    [".mc-card-img", "background: #1c1c1e;"],
+    [".mc-card-title", "color: #f5f5f7;"],
+    [".mc-card-price", "color: #8e8e93;"],
+    [".mc-fb-btn:hover", "background: rgba(255,255,255,0.10);"],
+    [".mc-nudge", "background: rgba(44,44,46,0.78); color: #f5f5f7; border-color: rgba(255,255,255,0.12);"],
+    [".mc-nudge-close", "color: #8e8e93;"],
+  ];
+
+  // Emits each dark rule twice: once inside a `prefers-color-scheme: dark`
+  // media query scoped to `[data-mc-theme="auto"]`, and once unconditionally
+  // scoped to `[data-mc-theme="dark"]`. `"light"` matches neither.
+  function buildDarkModeStyles() {
+    var mediaLines = ["@media (prefers-color-scheme: dark) {"];
+    DARK_RULES.forEach(function (r) {
+      mediaLines.push('  .mc-root[data-mc-theme="auto"] ' + r[0] + " { " + r[1] + " }");
+    });
+    mediaLines.push("}");
+
+    var darkLines = DARK_RULES.map(function (r) {
+      return '.mc-root[data-mc-theme="dark"] ' + r[0] + " { " + r[1] + " }";
+    });
+
+    return mediaLines.concat(darkLines);
+  }
+
   var STYLES = [
     ":host { all: initial; }",
     "*, *::before, *::after { box-sizing: border-box; }",
@@ -305,7 +357,7 @@
     ".mc-root.mc-left .mc-panel { right: auto; left: 0; }",
 
     // ---- Floating launcher ----
-    ".mc-btn { width: 56px; height: 56px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.35); cursor: pointer;",
+    ".mc-btn { width: 56px; height: 56px; border-radius: var(--mc-radius-btn, 50%); border: 1px solid rgba(255,255,255,0.35); cursor: pointer;",
     "  background: linear-gradient(180deg, rgba(255,255,255,0.35), transparent 60%), var(--mc-accent); color: #fff;",
     "  box-shadow: 0 8px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.5);",
     "  -webkit-backdrop-filter: blur(8px) saturate(1.6); backdrop-filter: blur(8px) saturate(1.6);",
@@ -315,10 +367,11 @@
     "  box-shadow: 0 12px 32px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.6); }",
     ".mc-btn:active { transform: scale(0.94); }",
     ".mc-btn svg { width: 26px; height: 26px; }",
+    ".mc-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }",
 
     // ---- Panel ----
     ".mc-panel { position: absolute; bottom: 74px; right: 0; width: 380px; max-width: calc(100vw - 32px);",
-    "  height: 560px; max-height: calc(100vh - 120px); background: rgba(255,255,255,0.78); border-radius: 26px;",
+    "  height: 560px; max-height: calc(100vh - 120px); background: rgba(255,255,255,0.78); border-radius: var(--mc-radius-panel, 26px);",
     "  -webkit-backdrop-filter: blur(24px) saturate(1.8); backdrop-filter: blur(24px) saturate(1.8);",
     "  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 20px 48px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.7);",
     "  display: none; flex-direction: column; overflow: hidden;",
@@ -329,9 +382,12 @@
     ".mc-panel.mc-visible { opacity: 1; transform: translateY(0) scale(1); }",
 
     // ---- Header (frosted) ----
-    ".mc-header { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between;",
+    ".mc-header { padding: calc(16px * var(--mc-space-scale)) calc(18px * var(--mc-space-scale)); display: flex; align-items: center; gap: 10px; justify-content: space-between;",
     "  background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1)); -webkit-backdrop-filter: saturate(180%) blur(20px);",
     "  backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(255,255,255,0.5); }",
+    ".mc-header-left { display: flex; align-items: center; gap: 10px; }",
+    ".mc-header-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: none; flex: none; }",
+    ".mc-header-avatar.mc-visible { display: block; }",
     ".mc-header-text { display: flex; flex-direction: column; gap: 1px; }",
     ".mc-title { font-size: 15px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; }",
     ".mc-subtitle { font-size: 12px; font-weight: 400; color: #6e6e73; }",
@@ -341,9 +397,9 @@
     ".mc-close:hover { background: rgba(0,0,0,0.06); color: #1d1d1f; }",
 
     // ---- Message list ----
-    ".mc-list { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 8px;",
+    ".mc-list { flex: 1; overflow-y: auto; padding: calc(18px * var(--mc-space-scale)) calc(16px * var(--mc-space-scale)); display: flex; flex-direction: column; gap: calc(8px * var(--mc-space-scale));",
     "  background: transparent; }",
-    ".mc-msg { max-width: 78%; padding: 9px 14px; border-radius: 20px; font-size: 15px; line-height: 1.4;",
+    ".mc-msg { max-width: 78%; padding: 9px 14px; border-radius: var(--mc-radius-msg, 20px); font-size: 15px; line-height: 1.4;",
     "  white-space: pre-wrap; word-wrap: break-word; letter-spacing: -0.01em; transition: transform .15s ease; }",
     ".mc-user { align-self: flex-end; background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent 60%), var(--mc-accent);",
     "  color: #fff; border-bottom-right-radius: 6px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.35); }",
@@ -359,10 +415,10 @@
     "@keyframes mc-blink { 0%, 70%, 100% { opacity: .35; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-2px); } }",
 
     // ---- Composer ----
-    ".mc-form { display: flex; gap: 8px; align-items: center; padding: 12px 14px;",
+    ".mc-form { display: flex; gap: calc(8px * var(--mc-space-scale)); align-items: center; padding: calc(12px * var(--mc-space-scale)) calc(14px * var(--mc-space-scale));",
     "  border-top: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.35);",
     "  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }",
-    ".mc-input { flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 22px; padding: 10px 16px; font-size: 15px;",
+    ".mc-input { flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: var(--mc-radius-input, 22px); padding: 10px 16px; font-size: 15px;",
     "  outline: none; font-family: inherit; color: #1d1d1f; background: rgba(255,255,255,0.6);",
     "  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);",
     "  transition: border-color .15s ease, box-shadow .15s ease; }",
@@ -388,7 +444,7 @@
 
     // ---- Product cards ----
     ".mc-products { align-self: flex-start; display: flex; flex-direction: column; gap: 8px; width: 82%; }",
-    ".mc-card { border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; overflow: hidden;",
+    ".mc-card { border: 1px solid rgba(0,0,0,0.08); border-radius: var(--mc-radius-card, 18px); overflow: hidden;",
     "  background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);",
     "  box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 8px 20px rgba(0,0,0,0.06); transition: transform .15s ease; }",
     ".mc-card:hover { transform: translateY(-1px); }",
@@ -422,36 +478,12 @@
     "  color: #6e6e73; cursor: pointer; font-size: 16px; line-height: 1; padding: 2px; }",
 
     // ---- Dark mode ----
-    "@media (prefers-color-scheme: dark) {",
-    "  .mc-panel { background: rgba(28,28,30,0.78); border-color: rgba(255,255,255,0.12); box-shadow: 0 20px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08); }",
-    "  .mc-header { background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent); border-bottom-color: rgba(255,255,255,0.1); }",
-    "  .mc-title { color: #f5f5f7; }",
-    "  .mc-subtitle { color: #8e8e93; }",
-    "  .mc-close { color: #8e8e93; }",
-    "  .mc-close:hover { background: rgba(255,255,255,0.10); color: #f5f5f7; }",
-    "  .mc-list { background: transparent; }",
-    "  .mc-user { background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 60%), var(--mc-accent); color: #fff; }",
-    "  .mc-bot { background: rgba(120,120,128,0.24); color: #f5f5f7; }",
-    "  .mc-error { background: #3a2321; color: #ff9b93; }",
-    "  .mc-typing { background: rgba(120,120,128,0.24); }",
-    "  .mc-dot { background: #636366; }",
-    "  .mc-form { background: rgba(28,28,30,0.5); border-top-color: rgba(255,255,255,0.1); }",
-    "  .mc-input { background: rgba(44,44,46,0.7); color: #f5f5f7; border-color: rgba(255,255,255,0.14); }",
-    "  .mc-input::placeholder { color: #8e8e93; }",
-    "  .mc-input:focus { border-color: var(--mc-accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.25); }",
-    "  .mc-btn { background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent 60%), var(--mc-accent); }",
-    "  .mc-btn:hover { background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent 60%), #3d9bff; }",
-    "  .mc-send { background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent 60%), var(--mc-accent); }",
-    "  .mc-send:hover:not(:disabled) { background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent 60%), #3d9bff; }",
-    "  .mc-card { background: rgba(44,44,46,0.6); border-color: rgba(255,255,255,0.1); }",
-    "  .mc-card-img { background: #1c1c1e; }",
-    "  .mc-card-title { color: #f5f5f7; }",
-    "  .mc-card-price { color: #8e8e93; }",
-    "  .mc-fb-btn:hover { background: rgba(255,255,255,0.10); }",
-    "  .mc-nudge { background: rgba(44,44,46,0.78); color: #f5f5f7; border-color: rgba(255,255,255,0.12); }",
-    "  .mc-nudge-close { color: #8e8e93; }",
-    "}",
-  ].join("\n");
+    // Rules below are duplicated: applied when the OS prefers dark AND the
+    // widget's darkMode setting is "auto", or unconditionally when darkMode
+    // is "dark". "light" matches neither form and falls through to the
+    // default (light) styling above regardless of OS preference.
+  ].concat(buildDarkModeStyles())
+    .join("\n");
 
   var host, root, panel, list, input, form, sendBtn, rootWrap;
   var conversationId = null;
@@ -470,15 +502,30 @@
     var wrap = document.createElement("div");
     wrap.className = "mc-root" + (APPEARANCE.position === "left" ? " mc-left" : "");
     wrap.style.setProperty("--mc-accent", APPEARANCE.accent);
+
+    var theme = APPEARANCE.theme || { shape: "rounded", density: "spacious" };
+    var isSharp = theme.shape === "sharp";
+    wrap.style.setProperty("--mc-radius-panel", isSharp ? "10px" : "26px");
+    wrap.style.setProperty("--mc-radius-msg", isSharp ? "6px" : "20px");
+    wrap.style.setProperty("--mc-radius-btn", isSharp ? "12px" : "50%");
+    wrap.style.setProperty("--mc-radius-input", isSharp ? "8px" : "22px");
+    wrap.style.setProperty("--mc-radius-card", isSharp ? "8px" : "18px");
+    wrap.style.setProperty("--mc-space-scale", theme.density === "compact" ? "0.7" : "1");
+
+    wrap.setAttribute("data-mc-theme", APPEARANCE.darkMode || "auto");
+
     rootWrap = wrap;
 
     panel = document.createElement("div");
     panel.className = "mc-panel";
     panel.innerHTML =
       '<div class="mc-header">' +
+      '<span class="mc-header-left">' +
+      '<img class="mc-header-avatar" alt="" />' +
       '<span class="mc-header-text">' +
       '<span class="mc-title"></span>' +
       '<span class="mc-subtitle"></span>' +
+      "</span>" +
       "</span>" +
       '<button class="mc-close" aria-label="Close chat">&times;</button>' +
       "</div>" +
@@ -495,7 +542,14 @@
     var btn = document.createElement("button");
     btn.className = "mc-btn";
     btn.setAttribute("aria-label", "Open chat");
-    btn.innerHTML = LAUNCHER_ICONS[APPEARANCE.launcher] || LAUNCHER_ICONS.chat;
+    if (APPEARANCE.avatarUrl) {
+      var launcherImg = document.createElement("img");
+      launcherImg.src = APPEARANCE.avatarUrl;
+      launcherImg.alt = "";
+      btn.appendChild(launcherImg);
+    } else {
+      btn.innerHTML = LAUNCHER_ICONS[APPEARANCE.launcher] || LAUNCHER_ICONS.chat;
+    }
 
     wrap.appendChild(panel);
     wrap.appendChild(btn);
@@ -505,6 +559,12 @@
     // Apply themed header text.
     panel.querySelector(".mc-title").textContent = APPEARANCE.title;
     panel.querySelector(".mc-subtitle").textContent = APPEARANCE.subtitle;
+
+    var headerAvatar = panel.querySelector(".mc-header-avatar");
+    if (APPEARANCE.avatarUrl) {
+      headerAvatar.src = APPEARANCE.avatarUrl;
+      headerAvatar.classList.add("mc-visible");
+    }
 
     list = panel.querySelector(".mc-list");
     input = panel.querySelector(".mc-input");
