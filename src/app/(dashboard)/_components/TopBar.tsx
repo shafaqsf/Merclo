@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import CommandPalette from "./CommandPalette";
 import Notifications from "./Notifications";
 
-export default function TopBar() {
+export default function TopBar({ userEmail }: { userEmail: string }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+
+  const initial = (userEmail.trim()[0] ?? "U").toUpperCase();
+  const name = userEmail.split("@")[0] || "Account";
 
   // Global ⌘K / Ctrl+K to toggle the command palette.
   useEffect(() => {
@@ -79,13 +82,16 @@ export default function TopBar() {
             />
           </div>
 
-          <div className="glass-panel flex items-center gap-2.5 !rounded-xl py-1.5 pl-1.5 pr-3">
+          <div
+            className="glass-panel flex items-center gap-2.5 !rounded-xl py-1.5 pl-1.5 pr-3"
+            title={userEmail}
+          >
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-ink">
-              M
+              {initial}
             </span>
             <span className="hidden leading-tight sm:block">
-              <span className="block max-w-[10rem] truncate text-[13px] font-semibold text-ink">
-                Merclo
+              <span className="block max-w-[10rem] truncate text-[13px] font-semibold capitalize text-ink">
+                {name}
               </span>
               <span className="block text-[11px] text-faint">Owner</span>
             </span>

@@ -1,12 +1,28 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
+import { createServerSupabase } from "@/lib/supabase/server";
+import { isAuthDisabled, devUserEmail } from "@/lib/auth/access";
+import SignOutButton from "./_components/SignOutButton";
 import NavLinks from "./_components/NavLinks";
 import TopBar from "./_components/TopBar";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const authDisabled = isAuthDisabled();
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user && !authDisabled) {
+    redirect("/login");
+  }
+
+  const email = user?.email ?? devUserEmail();
+
   return (
     <div className="flex min-h-screen bg-canvas text-ink">
       <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-sidebar-hairline bg-sidebar/85 text-sidebar-ink backdrop-blur-2xl backdrop-saturate-150">
@@ -37,10 +53,21 @@ export default function DashboardLayout({
             </Link>
           </div>
         </div>
+
+        <div className="border-t border-sidebar-hairline p-3">
+          <p className="mb-1 truncate px-3 text-xs text-sidebar-muted">
+            {email}
+          </p>
+          {authDisabled ? (
+            <p className="px-3 text-xs text-sidebar-muted">Auth disabled</p>
+          ) : (
+            <SignOutButton />
+          )}
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar />
+        <TopBar userEmail={email} />
         <main className="flex-1">
           <div className="mx-auto w-full max-w-[1600px] px-6 py-8 sm:px-10">
             {children}

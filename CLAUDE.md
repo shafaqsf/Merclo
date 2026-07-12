@@ -4,9 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Merclo is an open-source, self-hosted tool for embedding a `<script>` snippet into a Shopify storefront theme. The snippet renders a chat widget backed by an AI agent that acts on the shopper's behalf *within that storefront* (search products, read page context, manage cart, apply discounts, navigate). The operator configures bots through a dashboard.
-
-The app is **single-tenant and has no login**: there is no Supabase Auth, no multi-user accounts, and no RLS-based ownership. The dashboard is unauthenticated by design — anyone who can reach it can manage bots — so deployments are expected to gate access at the infrastructure layer (e.g. a reverse proxy, VPN, or hosting platform's own auth) if that's needed.
+Merclo is an open-source platform where Shopify merchants embed a `<script>` snippet into their storefront theme. The snippet renders a chat widget backed by an AI agent that acts on the shopper's behalf *within that storefront* (search products, read page context, manage cart, apply discounts, navigate). Merchants create and configure bots (one merchant → many bots) through a dashboard.
 
 ## Commands
 
@@ -20,7 +18,7 @@ npx vitest run src/lib/db/bots.test.ts   # run a single test file
 npx tsc --noEmit     # typecheck only (build also does this)
 ```
 
-Environment: copy `.env.example` → `.env.local`. Needs a Supabase URL + service-role key, an OpenRouter API key, and `AGENT_MODEL`. Apply the numbered migrations in `supabase/migrations/` in order (SQL editor or `supabase db push`) to create the `bots` / `conversations` tables (RLS is disabled as of `0006_remove_auth_rls.sql` — all access goes through the service-role client).
+Environment: copy `.env.example` → `.env.local`. Needs Supabase keys, an OpenRouter API key, and `AGENT_MODEL`. Apply the numbered migrations in `supabase/migrations/` in order (SQL editor or `supabase db push`) to create the `bots` / `conversations` tables and their RLS policies.
 
 ## Architecture
 
@@ -33,10 +31,9 @@ The defining constraint: there is **no Shopify App / OAuth**. The embed is a pla
 **The tool contract in `src/lib/tools/schema.ts` is the single source of truth** shared by both ends: the server builds the LLM tool-calling schema from it (`src/lib/agent/tools.ts`), and the widget maps each tool name to a browser implementation. Changing a tool means updating this file *and* the widget executor.
 
 Layout:
-- `src/lib/supabase/admin.ts` — the single service-role Supabase client (bypasses RLS). Every server-side read/write, dashboard or public chat runtime, goes through this one client — there's no cookie-bound or browser client.
-- `src/lib/db/constants.ts` — `DEFAULT_OWNER_ID`, the single fixed owner UUID every row is attributed to (single-tenant model, no real multi-user support).
-- `src/lib/db/{bots,conversations,analytics,knowledge,feedback}.ts` — data access, all via the admin client.
-- `src/app/(dashboard)/**` — dashboard UI, ungated (no auth); bot CRUD lives under `dashboard/bots`.
+- `src/lib/supabase/{server,client,admin}.ts` — SSR (cookie/RLS), browser, and service-role (bypasses RLS, used by the public chat endpoint) clients. `createServerSupabase()` is **async**.
+- `src/lib/db/{bots,conversations}.ts` — data access. Merchant-facing reads/writes go through the cookie-bound client (RLS-scoped to the owner); `getBotForRuntime` and all conversation writes use the admin client.
+- `src/app/(dashboard)/**` — merchant dashboard (auth-gated by `src/middleware.ts`); bot CRUD lives under `dashboard/bots`.
 - `src/app/api/bots/**` — bot CRUD API. `src/app/api/chat/turn` — the public, CORS-enabled, origin-checked agent endpoint.
 - `public/widget.js` — self-contained embeddable widget (Shadow DOM, no build step). `public/demo/index.html` — a fake storefront for local widget testing.
 
@@ -44,7 +41,7 @@ Security: `/api/chat/turn` validates the request `Origin` against the bot's `all
 
 ## Project status
 
-Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and a minimal **settings** page (`/dashboard/settings`, informational only — there's no account to manage). Not yet exercised end-to-end against a live Shopify store.
+Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and **account settings** (`/dashboard/settings` + `/api/account`). Not yet exercised end-to-end against a live Shopify store.
 
 Note: `.env.local` (gitignored) holds real secrets — never paste keys into the tracked `.env.example`.
 

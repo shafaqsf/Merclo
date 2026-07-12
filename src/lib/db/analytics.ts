@@ -1,7 +1,7 @@
 /**
- * Dashboard analytics. Aggregates bots and conversations in application code
- * (fine at scaffold scale). Single-tenant app: all reads go through the
- * service-role client.
+ * Dashboard analytics. Aggregates the signed-in merchant's bots and
+ * conversations in application code (fine at scaffold scale). All reads go
+ * through the cookie-bound client, so RLS scopes everything to the owner.
  */
 import { listBots, type Bot } from "@/lib/db/bots";
 import {
@@ -9,7 +9,7 @@ import {
   countToolCalls,
   type Conversation,
 } from "@/lib/db/conversations";
-import { createAdminSupabase } from "@/lib/supabase/admin";
+import { createServerSupabase } from "@/lib/supabase/server";
 
 export interface FeedbackTotals {
   up: number;
@@ -156,10 +156,10 @@ export function computeStats(
   };
 }
 
-/** Fetch thumbs up/down totals across all conversations. */
+/** Fetch thumbs up/down totals for the owner's bots (RLS-scoped). */
 async function fetchFeedbackTotals(): Promise<FeedbackTotals> {
   try {
-    const supabase = createAdminSupabase();
+    const supabase = await createServerSupabase();
     const { data, error } = await supabase
       .from("message_feedback")
       .select("rating");

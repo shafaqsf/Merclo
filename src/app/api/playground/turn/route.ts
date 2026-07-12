@@ -1,8 +1,9 @@
 /**
  * POST /api/playground/turn — same agent step as /api/chat/turn, but for the
- * in-dashboard test chat. Difference: there is no storefront origin
- * allow-list check. Storefront tools are executed by mock implementations in
- * the playground UI, not a real Shopify page.
+ * in-dashboard test chat. Differences: the caller must be the authenticated
+ * merchant who OWNS the bot (enforced via the cookie-bound client + RLS), and
+ * there is no storefront origin allow-list check. Storefront tools are executed
+ * by mock implementations in the playground UI, not a real Shopify page.
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
@@ -12,6 +13,7 @@ import {
   appendMessages,
 } from "@/lib/db/conversations";
 import { getBot } from "@/lib/db/bots";
+import { createServerSupabase } from "@/lib/supabase/server";
 import {
   runAgentStep,
   type ChatMessage,
@@ -41,6 +43,14 @@ const toolResultsTurnSchema = z.object({
 const bodySchema = z.union([userTurnSchema, toolResultsTurnSchema]);
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
   let raw: unknown;
   try {
     raw = await request.json();
@@ -54,6 +64,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
   const body = parsed.data;
 
+  // getBot uses the cookie-bound client, so RLS returns the bot only if the
+  // signed-in merchant owns it — this is the authorization check.
   const bot = await getBot(body.botId);
   if (!bot) {
     return NextResponse.json({ error: "Bot not found." }, { status: 404 });
