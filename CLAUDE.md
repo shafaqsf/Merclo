@@ -54,18 +54,18 @@ The UI follows an Apple-inspired design system. Tokens live in `src/app/globals.
 - **Test-driven development**: write a failing test before implementing the corresponding code, for all new features and bug fixes.
 - **Commit frequently**: make small commits with clear, meaningful messages as work progresses, rather than one large commit at the end.
 - **Keep the in-app Docs panel current**: the merchant-facing guide at `/dashboard/docs` (content in `src/lib/docs.ts`, unit-tested via `src/lib/docs.test.ts`) explains how Merclo works and the steps to a running bot. Whenever a feature changes what merchants do or how they set up a bot, update `src/lib/docs.ts` **as part of the same feature** — don't wait to be asked. This is a required part of "done" for any merchant-facing feature.
-- **Non-feature changes** (small fixes, config, docs not tied to a specific feature) may be committed and pushed directly to `main` — no branch needed.
+- **Non-feature changes** (small fixes, config, docs not tied to a specific feature) may be committed directly to `main` — no branch needed. (Pushing follows the remote-operations rule below.)
+- **Remote operations are user-gated**: the three-step remote flow — **pushing / opening a PR (`gh pr create`), merging the PR remotely (`gh pr merge`), and fetching/pulling the merged changes (`git fetch`/`git pull`)** — is only performed when the user explicitly asks for it. Do everything local (branch, commit, verify `tsc`/`lint`/`vitest`) autonomously, then stop. Claude may **suggest** the three-step flow when it makes sense, or ask whether to run it — but never runs any of those remote steps unprompted.
 
 ### Feature workflow, via branches
 
-Every feature is developed on its own dedicated branch, checked out **in place** in this one working directory — never directly on `main`, and no `git worktree`. Each session runs its own terminal in its own checkout, so there's no need for separate worktree folders; a plain branch switch is enough. This is the default — don't ask, just do it.
+Every feature is developed on its own dedicated branch, checked out **in place** in this one working directory — never directly on `main`, and no `git worktree`. Each session runs its own terminal in its own checkout, so a plain branch switch is enough; there's no need for separate worktree folders. This is the default — don't ask, just do it.
 
-1. **Start a feature** from `main`, up to date with `origin/main`:
-   `git checkout main && git pull --ff-only`, then `git checkout -b feature/<name>`.
+1. **Start a feature** from `main`. If a push/pull was authorized recently, make sure `main` is current first; otherwise branch from the local `main`. Then `git checkout -b feature/<name>`.
    If the working tree has unrelated uncommitted work, commit or `git stash` it first so you branch from a clean state.
 2. **Work and commit** on the feature branch, following the TDD and commit-frequently rules above.
-3. **Finish the feature**: `git push -u origin feature/<name>`, `gh pr create`, verify `tsc`/`lint`/`vitest` are clean, then merge the PR (`gh pr merge <n> --merge`).
-4. **Sync**: `git checkout main && git pull --ff-only` to bring `main` up to date with the merge.
-5. **Clean up**: `git branch -d feature/<name>` (and `git push origin --delete feature/<name>` if you want to remove the remote branch).
+3. **Finish locally**: make sure everything is committed and `tsc`/`lint`/`vitest` are clean. Stop here by default.
+4. **Ship (only when the user asks)**: `git push -u origin feature/<name>`, `gh pr create`, then merge the PR (`gh pr merge <n> --merge`), then sync `main` (`git checkout main && git pull --ff-only`). This is the user-gated three-step remote flow — suggest it if it makes sense, but wait for the go-ahead.
+5. **Clean up**: `git branch -d feature/<name>` (and, once the remote flow has been run, `git push origin --delete feature/<name>` to remove the remote branch, if desired).
 
-**Note:** this repo lives under a OneDrive-synced path, so avoid `git worktree` — sibling worktree folders full of `node_modules` get file handles held open by OneDrive (and stray Node processes), which makes them fail to remove on Windows with `Permission denied`. Staying in one checkout sidesteps that entirely.
+**Note:** this repo lives under a OneDrive-synced path, so avoid `git worktree` — sibling worktree folders full of `node_modules` get file handles held open by OneDrive (and stray Node processes), making them fail to remove on Windows with `Permission denied`. Staying in one checkout sidesteps that entirely.
