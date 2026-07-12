@@ -58,9 +58,12 @@ export default function CopilotPanel() {
     );
   }
 
+  const lastTurn = thread[thread.length - 1];
+  const pendingApproval = lastTurn?.role === "approvals";
+
   async function send() {
     const text = input.trim();
-    if (!text || busy) return;
+    if (!text || busy || pendingApproval) return;
     setInput("");
     setThread((t) => [...t, { role: "user", text }]);
     setBusy(true);
@@ -155,6 +158,11 @@ export default function CopilotPanel() {
       </div>
 
       <div className="border-t border-border p-3">
+        {pendingApproval && (
+          <p className="mb-2 text-xs text-muted-foreground">
+            Approve or reject the pending action first.
+          </p>
+        )}
         <div className="flex items-center gap-2">
           <input
             value={input}
@@ -163,9 +171,14 @@ export default function CopilotPanel() {
               if (e.key === "Enter") void send();
             }}
             placeholder="Ask the copilot…"
-            className="min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            disabled={pendingApproval}
+            className="min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
           />
-          <Button onClick={() => void send()} disabled={busy} aria-label="Send">
+          <Button
+            onClick={() => void send()}
+            disabled={busy || pendingApproval}
+            aria-label="Send"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>

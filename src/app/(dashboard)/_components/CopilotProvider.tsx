@@ -40,6 +40,21 @@ export default function CopilotProvider({
     });
   }, []);
 
+  // Hydrate the write mode from the server's persisted thread — the server
+  // is the source of truth for whether mutations require approval. Fetched
+  // asynchronously (not a direct setState in the effect body) so it doesn't
+  // trip react-hooks/set-state-in-effect, matching the pattern above.
+  useEffect(() => {
+    fetch("/api/copilot/turn")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { mode?: Mode } | null) => {
+        if (data?.mode === "accept" || data?.mode === "auto") {
+          setModeState(data.mode);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const setOpen = (v: boolean) => {
     setOpenState(v);
     window.localStorage.setItem("copilot:open", v ? "1" : "0");

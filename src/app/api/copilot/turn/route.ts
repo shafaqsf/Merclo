@@ -47,6 +47,12 @@ export async function POST(request: Request) {
       if (typeof text !== "string" || text.trim() === "") {
         return NextResponse.json({ error: "Empty message" }, { status: 400 });
       }
+      if (thread.pending_state) {
+        return NextResponse.json(
+          { error: "Resolve the pending approval first." },
+          { status: 409 }
+        );
+      }
       const result = await runCopilotTurn({
         mode: thread.mode,
         priorItems: thread.items,
@@ -92,4 +98,17 @@ export async function POST(request: Request) {
     const message = err instanceof Error ? err.message : "Copilot error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+export async function GET() {
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const thread = await getOrCreateCopilotThread();
+  return NextResponse.json({ mode: thread.mode });
 }
