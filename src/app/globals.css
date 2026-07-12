@@ -27,7 +27,7 @@
   --secondary: #f4f4f5;
   --secondary-foreground: #0a0a0a;
   --muted: #f4f4f5;
-  --muted-foreground: #71717a;
+  --muted-foreground: #52525b;
   --accent: #f4f4f5;
   --accent-foreground: #0a0a0a;
   --destructive: #e5484d;
@@ -61,7 +61,7 @@
   --surface-2: var(--muted);
   --elevated: var(--popover);
   --ink: var(--foreground);
-  --faint: #a1a1aa;
+  --faint: #71717a;
   --hairline: var(--border);
   --hairline-strong: #d4d4d8;
   --accent-hover: #262626;
