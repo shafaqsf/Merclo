@@ -41,7 +41,7 @@ Security: `/api/chat/turn` validates the request `Origin` against the bot's `all
 
 ## Project status
 
-Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and **account settings** (`/dashboard/settings` + `/api/account`). Not yet exercised end-to-end against a live Shopify store.
+Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and **account settings** (`/dashboard/settings` + `/api/account`). A merchant-facing **Docs panel** (`/dashboard/docs`, content in `src/lib/docs.ts`) explains how the app works and the steps to a running bot. Not yet exercised end-to-end against a live Shopify store.
 
 Note: `.env.local` (gitignored) holds real secrets — never paste keys into the tracked `.env.example`.
 
@@ -53,24 +53,19 @@ The UI follows an Apple-inspired design system. Tokens live in `src/app/globals.
 
 - **Test-driven development**: write a failing test before implementing the corresponding code, for all new features and bug fixes.
 - **Commit frequently**: make small commits with clear, meaningful messages as work progresses, rather than one large commit at the end.
-- **Non-feature changes** (small fixes, config, docs not tied to a specific feature) may be committed and pushed directly to `main` from the `main` worktree — no branch/worktree needed.
+- **Keep the in-app Docs panel current**: the merchant-facing guide at `/dashboard/docs` (content in `src/lib/docs.ts`, unit-tested via `src/lib/docs.test.ts`) explains how Merclo works and the steps to a running bot. Whenever a feature changes what merchants do or how they set up a bot, update `src/lib/docs.ts` **as part of the same feature** — don't wait to be asked. This is a required part of "done" for any merchant-facing feature.
+- **Non-feature changes** (small fixes, config, docs not tied to a specific feature) may be committed and pushed directly to `main` — no branch needed.
 
-### Feature workflow, via worktrees
+### Feature workflow, via branches
 
-Every feature is developed on its own dedicated branch, never directly on `main`, and each branch gets its **own `git worktree`** (a separate folder checked out on that branch, sharing the same `.git` history) instead of being checked out in place. This is the default now — don't ask whether to use a worktree, just do it. It avoids `git stash`/`checkout` juggling in one folder when work overlaps.
+Every feature is developed on its own dedicated branch, checked out **in place** in this one working directory — never directly on `main`, and no `git worktree`. Each session runs its own terminal in its own checkout, so a plain branch switch is enough; there's no need for separate worktree folders. This is the default — don't ask, just do it.
 
-**Setup (one-time):** keep one worktree permanently on `main` as the base — e.g. this repo's original folder stays on `main`. Every feature gets a **new sibling folder**, never reusing the `main` folder for feature work.
+1. **Start a feature** from `main`, up to date with `origin/main`:
+   `git checkout main && git pull --ff-only`, then `git checkout -b feature/<name>`.
+   If the working tree has unrelated uncommitted work, commit or `git stash` it first so you branch from a clean state.
+2. **Work and commit** on the feature branch, following the TDD and commit-frequently rules above.
+3. **Finish the feature**: `git push -u origin feature/<name>`, `gh pr create`, verify `tsc`/`lint`/`vitest` are clean, then merge the PR (`gh pr merge <n> --merge`).
+4. **Sync**: `git checkout main && git pull --ff-only` to bring `main` up to date with the merge.
+5. **Clean up**: `git branch -d feature/<name>` (and `git push origin --delete feature/<name>` to remove the remote branch, if desired).
 
-1. **Start a feature** from the `main` worktree, up to date with `origin/main`:
-   `git worktree add ../merclo-<feature> -b feature/<name>`
-   Then work inside `../merclo-<feature>`. It needs its own `npm install` and `.env.local` — worktrees don't share `node_modules` or gitignored files.
-2. **List active worktrees** any time: `git worktree list`.
-3. **Finish the feature**: commit, push, `gh pr create`, verify `tsc`/`lint`/`vitest` are clean, then merge the PR (`gh pr merge <n> --merge`).
-4. **Sync**: `git fetch origin main` + `git merge --ff-only origin/main` (or `git pull --ff-only`) in the `main` worktree.
-5. **Clean up** — from a *different* worktree than the one being removed (you can't remove the worktree you're standing in):
-   `git worktree remove ../merclo-<feature>` (git refuses if there are uncommitted changes, so it won't silently discard work), then `git branch -d feature/<name>`.
-
-**Gotchas learned the hard way:**
-- The folder a repo was originally cloned/created in is the **primary worktree** — it holds `.git` itself and `git worktree remove` cannot target it, even when it's checked out on a feature branch. If a feature ends up developed in the primary folder instead of a proper linked worktree, "cleanup" means switching that folder back to `main` (`git checkout main`) and deleting the branch — not removing the folder.
-- On Windows, a running dev server or editor can hold a lock on a worktree's directory handle, making `git worktree remove` (or even `rm -rf`) fail with `Permission denied` even after all the files inside were deleted — leaving an empty, unregistered leftover folder. This is not data loss; just close whatever's watching that folder and retry.
-- Never force through a stash/worktree-removal permission denial by deleting things another way — treat it as a signal to stop and check what's actually holding the lock or whether the target is really disposable (e.g. the primary worktree) first.
+**Note:** this repo lives under a OneDrive-synced path, so avoid `git worktree` — sibling worktree folders full of `node_modules` get file handles held open by OneDrive (and stray Node processes), making them fail to remove on Windows with `Permission denied`. Staying in one checkout sidesteps that entirely.
