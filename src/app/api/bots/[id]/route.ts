@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteBot, getBot, updateBot } from "@/lib/db/bots";
+import { resolveAppearance } from "@/lib/bots/appearance";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -46,7 +47,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     patch.allowed_origins = data.allowed_origins as string[];
   }
   if (data.appearance && typeof data.appearance === "object") {
-    patch.appearance = data.appearance as Record<string, unknown>;
+    patch.appearance = resolveAppearance(data.appearance) as unknown as Record<string, unknown>;
   }
 
   const bot = await updateBot(id, patch);

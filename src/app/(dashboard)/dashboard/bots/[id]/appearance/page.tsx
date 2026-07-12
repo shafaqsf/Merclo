@@ -10,8 +10,11 @@ import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Field } from "@/components/ui/Field";
+import { Switch } from "@/components/ui/Switch";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { BotTabs } from "../_components/BotTabs";
 import { WidgetPreview } from "../_components/WidgetPreview";
+import { AvatarUpload } from "./_components/AvatarUpload";
 
 const selectClass =
   "w-full rounded-xl border border-hairline bg-surface-2 px-3.5 py-2.5 text-sm " +
@@ -73,6 +76,17 @@ export default function AppearancePage({
     setState((prev) => ({
       ...prev,
       proactive: { ...prev.proactive, [key]: value },
+    }));
+    setSaved(false);
+  }
+
+  function updateTheme<K extends keyof WidgetAppearance["theme"]>(
+    key: K,
+    value: WidgetAppearance["theme"][K]
+  ) {
+    setState((prev) => ({
+      ...prev,
+      theme: { ...prev.theme, [key]: value },
     }));
     setSaved(false);
   }
@@ -252,33 +266,73 @@ export default function AppearancePage({
                 />
               </Field>
 
-              <label className="flex cursor-pointer items-center gap-3 text-sm text-ink">
-                <input
-                  type="checkbox"
-                  checked={state.showProductCards}
-                  onChange={(e) =>
-                    update("showProductCards", e.target.checked)
-                  }
-                  className="h-4 w-4 accent-[color:var(--accent)]"
-                />
-                Show product cards in chat
-              </label>
+              <Switch
+                id="showProductCards"
+                checked={state.showProductCards}
+                onChange={(checked) => update("showProductCards", checked)}
+                label="Show product cards in chat"
+              />
             </CardBody>
           </Card>
 
           <Card>
             <CardBody className="space-y-5 p-6">
-              <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-ink">
-                <input
-                  type="checkbox"
-                  checked={state.proactive.enabled}
-                  onChange={(e) =>
-                    updateProactive("enabled", e.target.checked)
-                  }
-                  className="h-4 w-4 accent-[color:var(--accent)]"
+              <Field label="Avatar / logo" hint="Shown in the chat header and launcher button.">
+                <AvatarUpload
+                  botId={id}
+                  value={state.avatarUrl}
+                  onChange={(url) => update("avatarUrl", url)}
                 />
-                Proactive greeting
-              </label>
+              </Field>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardBody className="space-y-5 p-6">
+              <Field label="Shape">
+                <SegmentedControl
+                  value={state.theme.shape}
+                  onChange={(v) => updateTheme("shape", v)}
+                  options={[
+                    { value: "rounded", label: "Rounded" },
+                    { value: "sharp", label: "Sharp" },
+                  ]}
+                />
+              </Field>
+
+              <Field label="Density">
+                <SegmentedControl
+                  value={state.theme.density}
+                  onChange={(v) => updateTheme("density", v)}
+                  options={[
+                    { value: "compact", label: "Compact" },
+                    { value: "spacious", label: "Spacious" },
+                  ]}
+                />
+              </Field>
+
+              <Field label="Dark mode">
+                <SegmentedControl
+                  value={state.darkMode}
+                  onChange={(v) => update("darkMode", v)}
+                  options={[
+                    { value: "auto", label: "Auto" },
+                    { value: "light", label: "Light" },
+                    { value: "dark", label: "Dark" },
+                  ]}
+                />
+              </Field>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardBody className="space-y-5 p-6">
+              <Switch
+                id="proactiveEnabled"
+                checked={state.proactive.enabled}
+                onChange={(checked) => updateProactive("enabled", checked)}
+                label={<span className="font-medium">Proactive greeting</span>}
+              />
 
               <Field
                 label="Delay (ms)"

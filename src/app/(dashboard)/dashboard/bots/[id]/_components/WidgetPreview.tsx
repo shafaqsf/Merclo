@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState, type CSSProperties } from "react";
 import type { WidgetAppearance } from "@/lib/bots/appearance";
 
 /**
@@ -7,6 +8,53 @@ import type { WidgetAppearance } from "@/lib/bots/appearance";
  * presentational — mirrors what the embedded widget renders from the same
  * appearance config so merchants get a live preview while editing.
  */
+
+// Mirrors the light/dark token values from `src/app/globals.css`. This
+// preview needs to force light or dark regardless of the OS preference (the
+// `darkMode` "light"/"dark" overrides), which the page's CSS custom
+// properties can't do since they're driven by a `prefers-color-scheme`
+// media query, not a class/attribute. Scoping an explicit override to just
+// this container is the narrowest way to diverge without introducing
+// Tailwind `dark:` variants app-wide.
+const LIGHT_VARS: Record<string, string> = {
+  "--canvas": "#f5f5f7",
+  "--surface": "#ffffff",
+  "--surface-2": "#fbfbfd",
+  "--ink": "#1d1d1f",
+  "--muted": "#6e6e73",
+  "--faint": "#86868b",
+  "--hairline": "rgba(0, 0, 0, 0.08)",
+};
+
+const DARK_VARS: Record<string, string> = {
+  "--canvas": "#000000",
+  "--surface": "#1c1c1e",
+  "--surface-2": "#2c2c2e",
+  "--ink": "#f5f5f7",
+  "--muted": "#a1a1a6",
+  "--faint": "#8e8e93",
+  "--hairline": "rgba(255, 255, 255, 0.1)",
+};
+
+function useResolvedDarkMode(darkMode: WidgetAppearance["darkMode"]): boolean {
+  const [systemDark, setSystemDark] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+
+  useEffect(() => {
+    if (darkMode !== "auto") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [darkMode]);
+
+  if (darkMode === "light") return false;
+  if (darkMode === "dark") return true;
+  return systemDark;
+}
 
 function LauncherIcon({ kind }: { kind: WidgetAppearance["launcher"] }) {
   if (kind === "sparkle") {
@@ -61,11 +109,23 @@ export function WidgetPreview({
 }: {
   appearance: WidgetAppearance;
 }) {
-  const { accent, position } = appearance;
+  const { accent, position, theme, avatarUrl } = appearance;
   const alignEnd = position === "right";
+  const isDark = useResolvedDarkMode(appearance.darkMode);
+  const vars = isDark ? DARK_VARS : LIGHT_VARS;
+
+  const panelRadius = theme.shape === "sharp" ? "rounded-lg" : "rounded-2xl";
+  const msgRadius = theme.shape === "sharp" ? "rounded-md" : "rounded-2xl";
+  const density = theme.density === "compact" ? "compact" : "spacious";
+  const listPadding = density === "compact" ? "p-2.5 gap-1.5" : "p-4 gap-2";
+  const headerPadding = density === "compact" ? "px-3 py-2.5" : "px-4 py-3.5";
+  const composerPadding = density === "compact" ? "px-2.5 py-2" : "px-3 py-2.5";
 
   return (
-    <div className="sticky top-8">
+    <div
+      className="sticky top-8"
+      style={vars as CSSProperties}
+    >
       <p className="mb-3 text-xs font-medium uppercase tracking-wide text-faint">
         Live preview
       </p>
@@ -76,27 +136,43 @@ export function WidgetPreview({
           }
         >
           {/* Panel */}
-          <div className="flex h-[440px] w-full max-w-[340px] flex-col overflow-hidden rounded-2xl border border-hairline bg-surface shadow-[var(--shadow-sm)]">
+          <div
+            className={`flex h-[440px] w-full max-w-[340px] flex-col overflow-hidden ${panelRadius} border border-hairline bg-surface shadow-[var(--shadow-sm)]`}
+          >
             {/* Header */}
             <div
-              className="flex items-center justify-between px-4 py-3.5 text-white"
+              className={`flex items-center justify-between ${headerPadding} text-white`}
               style={{ background: accent }}
             >
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold leading-tight">
-                  {appearance.title || "Chat with us"}
-                </span>
-                <span className="text-xs opacity-80">
-                  {appearance.subtitle}
-                </span>
+              <div className="flex items-center gap-2.5">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : null}
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold leading-tight">
+                    {appearance.title || "Chat with us"}
+                  </span>
+                  <span className="text-xs opacity-80">
+                    {appearance.subtitle}
+                  </span>
+                </div>
               </div>
               <span className="text-lg leading-none opacity-80">&times;</span>
             </div>
 
             {/* Message list */}
-            <div className="flex flex-1 flex-col gap-2 overflow-y-auto bg-surface-2 p-4">
+            <div
+              className={`flex flex-1 flex-col overflow-y-auto bg-surface-2 ${listPadding}`}
+            >
               {appearance.greeting && (
-                <div className="max-w-[80%] self-start rounded-2xl rounded-bl-md bg-surface px-3.5 py-2 text-[13px] text-ink shadow-[var(--shadow-sm)]">
+                <div
+                  className={`max-w-[80%] self-start ${msgRadius} rounded-bl-md bg-surface px-3.5 py-2 text-[13px] text-ink shadow-[var(--shadow-sm)]`}
+                >
                   {appearance.greeting}
                 </div>
               )}
@@ -116,7 +192,9 @@ export function WidgetPreview({
               )}
 
               {appearance.showProductCards && (
-                <div className="mt-1 w-[75%] self-start overflow-hidden rounded-xl border border-hairline bg-surface">
+                <div
+                  className={`mt-1 w-[75%] self-start overflow-hidden ${msgRadius} border border-hairline bg-surface`}
+                >
                   <div className="flex h-24 items-center justify-center bg-surface-2 text-faint">
                     <svg
                       viewBox="0 0 24 24"
@@ -147,7 +225,9 @@ export function WidgetPreview({
             </div>
 
             {/* Composer */}
-            <div className="flex items-center gap-2 border-t border-hairline bg-surface px-3 py-2.5">
+            <div
+              className={`flex items-center gap-2 border-t border-hairline bg-surface ${composerPadding}`}
+            >
               <div className="flex-1 rounded-full border border-hairline bg-surface-2 px-3.5 py-2 text-[13px] text-faint">
                 Message…
               </div>
@@ -176,10 +256,15 @@ export function WidgetPreview({
             type="button"
             disabled
             aria-hidden
-            className="mt-4 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+            className="mt-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full text-white shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
             style={{ background: accent }}
           >
-            <LauncherIcon kind={appearance.launcher} />
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <LauncherIcon kind={appearance.launcher} />
+            )}
           </button>
         </div>
       </div>
