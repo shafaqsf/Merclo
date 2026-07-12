@@ -26,7 +26,7 @@ describe("docs content", () => {
 
     const all = JSON.stringify(COPILOT_INFO);
     expect(all).toMatch(/copilot/i);
-    expect(all).toMatch(/accept/i);
+    expect(all).toMatch(/review/i);
     expect(all).toMatch(/auto/i);
     expect(all).toMatch(/account/i);
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, X, Send } from "lucide-react";
+import { Sparkles, X, Send, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCopilot } from "./CopilotProvider";
 
@@ -9,6 +9,50 @@ interface PendingApproval {
   approvalId: string;
   toolName: string;
   arguments: string;
+}
+
+/** Human-readable label for each action the copilot can ask to perform. */
+const TOOL_LABELS: Record<string, string> = {
+  create_bot: "create a new bot",
+  update_bot: "update a bot",
+  delete_bot: "delete a bot",
+  add_knowledge: "add a knowledge entry",
+  delete_knowledge: "delete a knowledge entry",
+  delete_conversation: "delete a conversation",
+};
+
+/** Friendly labels for the argument keys shown on an approval card. */
+const ARG_LABELS: Record<string, string> = {
+  id: "ID",
+  bot_id: "Bot",
+  name: "Name",
+  persona: "Persona",
+  title: "Title",
+  content: "Content",
+  kind: "Type",
+  allowed_tools: "Tools",
+  allowed_origins: "Origins",
+};
+
+function describeTool(name: string): string {
+  return TOOL_LABELS[name] ?? name.replace(/_/g, " ");
+}
+
+/** Parse a tool's JSON arguments into readable label/value rows. */
+function formatArgs(raw: string): { label: string; value: string }[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!parsed || typeof parsed !== "object") return [];
+  return Object.entries(parsed as Record<string, unknown>)
+    .filter(([, v]) => v !== undefined && v !== null && v !== "")
+    .map(([key, v]) => ({
+      label: ARG_LABELS[key] ?? key.replace(/_/g, " "),
+      value: Array.isArray(v) ? v.join(", ") : String(v),
+    }));
 }
 type Turn =
   | { role: "user"; text: string }
@@ -36,7 +80,10 @@ function applyResponse(data: unknown, thread: Turn[]): Turn[] {
   }
   return [
     ...thread,
-    { role: "assistant", text: "Something went wrong. Please try again." },
+    {
+      role: "assistant",
+      text: "Sorry — I couldn't complete that. Please try rephrasing or try again.",
+    },
   ];
 }
 
@@ -97,9 +144,19 @@ export default function CopilotPanel() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMode(mode === "accept" ? "auto" : "accept")}
-            className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            title={
+              mode === "accept"
+                ? "Review mode: you approve each change before it runs. Click to switch to Auto."
+                : "Auto mode: changes apply immediately. Click to switch to Review."
+            }
+            className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            {mode === "accept" ? "Accept" : "Auto"}
+            {mode === "accept" ? (
+              <ShieldCheck className="h-3.5 w-3.5" />
+            ) : (
+              <Zap className="h-3.5 w-3.5" />
+            )}
+            {mode === "accept" ? "Review changes" : "Auto-apply"}
           </button>
           <button onClick={() => setOpen(false)} aria-label="Close copilot">
             <X className="h-4 w-4 text-muted-foreground" />
@@ -108,38 +165,74 @@ export default function CopilotPanel() {
       </header>
 
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 text-sm">
+        {thread.length === 0 && !busy && (
+          <div className="space-y-3 text-muted-foreground">
+            <p className="text-foreground">
+              Hi — I&apos;m your dashboard copilot.
+            </p>
+            <p>
+              I can manage your account for you: create and edit bots, add
+              knowledge entries, review shopper conversations, and pull up
+              analytics. I only ever touch your own data.
+            </p>
+            <p className="text-xs">Try asking:</p>
+            <ul className="space-y-1 text-xs">
+              <li>· &ldquo;List my bots&rdquo;</li>
+              <li>· &ldquo;How many conversations did I get this week?&rdquo;</li>
+              <li>· &ldquo;Add a return-policy note to my store bot&rdquo;</li>
+            </ul>
+          </div>
+        )}
         {thread.map((turn, i) => {
           if (turn.role === "approvals") {
             return (
               <div key={i} className="space-y-2">
-                {turn.pending.map((p) => (
-                  <div
-                    key={p.approvalId}
-                    className="rounded-lg border border-border p-3"
-                  >
-                    <p className="mb-2 text-foreground">
-                      Run <span className="font-medium">{p.toolName}</span>?
-                    </p>
-                    <pre className="mb-2 overflow-x-auto text-xs text-muted-foreground">
-                      {p.arguments}
-                    </pre>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => decide(p.approvalId, true)}
-                        disabled={busy}
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        onClick={() => decide(p.approvalId, false)}
-                        disabled={busy}
-                      >
-                        Reject
-                      </Button>
+                {turn.pending.map((p) => {
+                  const rows = formatArgs(p.arguments);
+                  return (
+                    <div
+                      key={p.approvalId}
+                      className="rounded-lg border border-border p-3"
+                    >
+                      <p className="mb-2 text-foreground">
+                        The copilot wants to{" "}
+                        <span className="font-medium">
+                          {describeTool(p.toolName)}
+                        </span>
+                        .
+                      </p>
+                      {rows.length > 0 && (
+                        <dl className="mb-3 space-y-1 text-xs">
+                          {rows.map((r) => (
+                            <div key={r.label} className="flex gap-2">
+                              <dt className="shrink-0 text-muted-foreground">
+                                {r.label}:
+                              </dt>
+                              <dd className="min-w-0 break-words text-foreground">
+                                {r.value}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => decide(p.approvalId, true)}
+                          disabled={busy}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() => decide(p.approvalId, false)}
+                          disabled={busy}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             );
           }
@@ -154,13 +247,13 @@ export default function CopilotPanel() {
             </div>
           );
         })}
-        {busy && <div className="text-muted-foreground">Thinking…</div>}
+        {busy && <div className="text-muted-foreground">Working on it…</div>}
       </div>
 
       <div className="border-t border-border p-3">
         {pendingApproval && (
           <p className="mb-2 text-xs text-muted-foreground">
-            Approve or reject the pending action first.
+            Approve or cancel the pending action before sending a new message.
           </p>
         )}
         <div className="flex items-center gap-2">
@@ -170,7 +263,7 @@ export default function CopilotPanel() {
             onKeyDown={(e) => {
               if (e.key === "Enter") void send();
             }}
-            placeholder="Ask the copilot…"
+            placeholder="Ask the copilot to do something…"
             disabled={pendingApproval}
             className="min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
           />
@@ -182,6 +275,19 @@ export default function CopilotPanel() {
             <Send className="h-4 w-4" />
           </Button>
         </div>
+        <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          {mode === "accept" ? (
+            <>
+              <ShieldCheck className="h-3 w-3 shrink-0" />
+              Review mode · you approve each change before it runs.
+            </>
+          ) : (
+            <>
+              <Zap className="h-3 w-3 shrink-0" />
+              Auto mode · changes apply immediately.
+            </>
+          )}
+        </p>
       </div>
     </aside>
   );
