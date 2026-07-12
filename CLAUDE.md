@@ -52,14 +52,25 @@ The UI follows an Apple-inspired design system. Tokens live in `src/app/globals.
 ## Development workflow
 
 - **Test-driven development**: write a failing test before implementing the corresponding code, for all new features and bug fixes.
-- **Feature branches, via worktrees**: every feature is developed on its own dedicated branch, never directly on `main` — and each branch gets its own `git worktree` rather than being checked out in place. This keeps concurrent work (e.g. a feature branch and a same-day hotfix) in separate directories instead of colliding via `git stash`/`checkout` in one working tree.
-  - Start a feature: `git worktree add ../merclo-<feature> -b feature/<name>` (branching from up-to-date `main`), then `cd` into it. Each worktree needs its own `npm install` and `.env.local` (these aren't shared between worktrees).
-  - List active worktrees: `git worktree list`.
-  - Clean up after merging: `git worktree remove ../merclo-<feature>` (git refuses if there are uncommitted changes, so it won't silently discard work), then `git branch -d feature/<name>` in the main worktree.
 - **Commit frequently**: make small commits with clear, meaningful messages as work progresses, rather than one large commit at the end.
-- **Feature completion flow**: once a feature is complete and all tests, build checks, and linting pass:
-  1. Push the branch to the remote.
-  2. Open a pull request.
-  3. Merge the pull request into `main`.
-  4. Synchronize the main worktree with the latest remote `main`, then remove the feature worktree.
-- **Non-feature changes** (e.g. small fixes, config, docs not tied to a specific feature): commits may be made and pushed directly to `main` from the main worktree.
+- **Non-feature changes** (small fixes, config, docs not tied to a specific feature) may be committed and pushed directly to `main` from the `main` worktree — no branch/worktree needed.
+
+### Feature workflow, via worktrees
+
+Every feature is developed on its own dedicated branch, never directly on `main`, and each branch gets its **own `git worktree`** (a separate folder checked out on that branch, sharing the same `.git` history) instead of being checked out in place. This is the default now — don't ask whether to use a worktree, just do it. It avoids `git stash`/`checkout` juggling in one folder when work overlaps.
+
+**Setup (one-time):** keep one worktree permanently on `main` as the base — e.g. this repo's original folder stays on `main`. Every feature gets a **new sibling folder**, never reusing the `main` folder for feature work.
+
+1. **Start a feature** from the `main` worktree, up to date with `origin/main`:
+   `git worktree add ../merclo-<feature> -b feature/<name>`
+   Then work inside `../merclo-<feature>`. It needs its own `npm install` and `.env.local` — worktrees don't share `node_modules` or gitignored files.
+2. **List active worktrees** any time: `git worktree list`.
+3. **Finish the feature**: commit, push, `gh pr create`, verify `tsc`/`lint`/`vitest` are clean, then merge the PR (`gh pr merge <n> --merge`).
+4. **Sync**: `git fetch origin main` + `git merge --ff-only origin/main` (or `git pull --ff-only`) in the `main` worktree.
+5. **Clean up** — from a *different* worktree than the one being removed (you can't remove the worktree you're standing in):
+   `git worktree remove ../merclo-<feature>` (git refuses if there are uncommitted changes, so it won't silently discard work), then `git branch -d feature/<name>`.
+
+**Gotchas learned the hard way:**
+- The folder a repo was originally cloned/created in is the **primary worktree** — it holds `.git` itself and `git worktree remove` cannot target it, even when it's checked out on a feature branch. If a feature ends up developed in the primary folder instead of a proper linked worktree, "cleanup" means switching that folder back to `main` (`git checkout main`) and deleting the branch — not removing the folder.
+- On Windows, a running dev server or editor can hold a lock on a worktree's directory handle, making `git worktree remove` (or even `rm -rf`) fail with `Permission denied` even after all the files inside were deleted — leaving an empty, unregistered leftover folder. This is not data loss; just close whatever's watching that folder and retry.
+- Never force through a stash/worktree-removal permission denial by deleting things another way — treat it as a signal to stop and check what's actually holding the lock or whether the target is really disposable (e.g. the primary worktree) first.
