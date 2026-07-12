@@ -5,9 +5,9 @@
  */
 import Link from "next/link";
 import { getDashboardStats, type DashboardStats } from "@/lib/db/analytics";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/StatCard";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -119,7 +119,7 @@ export default async function AnalyticsPage() {
                         </span>
                         <span className="truncate">{q.question}</span>
                       </span>
-                      <Badge tone="neutral">{q.count}</Badge>
+                      <Badge variant="secondary">{q.count}</Badge>
                     </li>
                   ))}
                 </ol>
@@ -157,9 +157,9 @@ export default async function AnalyticsPage() {
                         <span className="font-medium text-ink">{t.name}</span>
                         <span className="text-faint">{t.count}</span>
                       </div>
-                      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-accent-soft">
+                      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-accent"
+                          className="h-full rounded-full bg-primary"
                           style={{
                             width: `${
                               maxTool > 0 ? (t.count / maxTool) * 100 : 0
@@ -189,7 +189,7 @@ export default async function AnalyticsPage() {
                         className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm transition-colors hover:bg-surface-2"
                       >
                         <span className="truncate text-ink">{b.name}</span>
-                        <Badge tone="neutral">
+                        <Badge variant="secondary">
                           {b.conversationCount}
                         </Badge>
                       </Link>

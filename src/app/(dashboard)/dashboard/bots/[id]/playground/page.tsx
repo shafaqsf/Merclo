@@ -2,9 +2,9 @@
 
 import { use, useRef, useState } from "react";
 import { Wrench, ThumbsUp, ThumbsDown, ShoppingBag } from "lucide-react";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Card } from "@/components/ui/Card";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 
 /* ------------------------------------------------------------------ *
@@ -391,7 +391,7 @@ export default function PlaygroundPage({
             if (item.role === "error") {
               return (
                 <div key={item.id} className="flex justify-center">
-                  <div className="rounded-xl bg-accent-soft px-4 py-2 text-sm text-danger">
+                  <div className="rounded-xl bg-muted px-4 py-2 text-sm text-destructive">
                     {item.content}
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export default function PlaygroundPage({
                   className={cn(
                     "max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-[var(--shadow-sm)]",
                     isUser
-                      ? "bg-accent text-accent-ink"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-surface-2 text-ink"
                   )}
                 >
@@ -436,7 +436,7 @@ export default function PlaygroundPage({
                       className={cn(
                         "grid h-7 w-7 place-items-center rounded-full text-sm transition-colors",
                         vote === "up"
-                          ? "bg-accent-soft text-accent"
+                          ? "bg-muted text-foreground"
                           : "text-faint hover:bg-surface-2 hover:text-muted"
                       )}
                     >

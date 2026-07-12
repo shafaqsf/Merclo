@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
+import { Card, CardBody } from "@/components/ui/card";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/Field";
 import { buildEmbedSnippet } from "@/lib/embed";
 import { cn } from "@/lib/cn";
@@ -28,8 +29,8 @@ function StepIndicator({ current }: { current: number }) {
               <span
                 className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-medium transition-colors",
-                  active && "bg-accent text-accent-ink",
-                  done && "bg-accent-soft text-accent",
+                  active && "bg-primary text-primary-foreground",
+                  done && "bg-muted text-foreground",
                   !active && !done && "bg-surface-2 text-faint"
                 )}
               >
@@ -188,7 +189,7 @@ export default function OnboardingPage() {
                 closing <code className="text-ink">&lt;/body&gt;</code> tag.
               </p>
               <div className="relative">
-                <pre className="overflow-x-auto rounded-xl bg-[#1d1d1f] px-4 py-4 text-[13px] leading-relaxed text-[#f5f5f7]">
+                <pre className="overflow-x-auto rounded-xl border border-border bg-muted px-4 py-4 text-[13px] leading-relaxed text-foreground">
                   <code>{buildEmbedSnippet(botId, APP_URL)}</code>
                 </pre>
                 <div className="absolute right-3 top-3">

@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
+import { Card, CardBody } from "@/components/ui/card";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/Field";
 
 export default function NewBotPage() {

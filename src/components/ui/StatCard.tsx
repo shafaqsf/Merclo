@@ -1,26 +1,21 @@
 import * as React from "react";
 import { cn } from "@/lib/cn";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 
 export type StatTone = "blue" | "green" | "purple" | "orange";
 
-const toneChip: Record<StatTone, string> = {
-  blue: "bg-[color:rgb(0_113_227_/_0.12)] text-[color:#0071e3]",
-  green: "bg-[color:rgb(52_199_89_/_0.14)] text-[color:#1f9d4d]",
-  purple: "bg-[color:rgb(120_86_255_/_0.14)] text-[color:#7856ff]",
-  orange: "bg-[color:rgb(255_149_0_/_0.16)] text-[color:#e07c00]",
-};
-
 /**
- * KPI card: label, large value, colored icon chip, optional delta vs. a
+ * KPI card: label, large value, monochrome icon chip, optional delta vs. a
  * previous period. `delta` is a fraction (0.125 = +12.5%); positive green.
+ * `tone` is retained for API compatibility but no longer changes the color
+ * (the design system is strictly monochrome).
  */
 export function StatCard({
   label,
   value,
   delta,
   icon,
-  tone = "blue",
+  tone: _tone = "blue",
   className,
 }: {
   label: string;
@@ -36,21 +31,16 @@ export function StatCard({
   return (
     <Card className={cn("p-5", className)}>
       <div className="flex items-start justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-faint">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
         {icon && (
-          <span
-            className={cn(
-              "grid h-9 w-9 place-items-center rounded-xl",
-              toneChip[tone]
-            )}
-          >
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-muted text-foreground">
             {icon}
           </span>
         )}
       </div>
-      <div className="mt-3 text-[28px] font-semibold leading-none tracking-tight text-ink">
+      <div className="mt-3 text-[28px] font-semibold leading-none tracking-tight text-foreground">
         {value}
       </div>
       {hasDelta ? (
@@ -58,15 +48,15 @@ export function StatCard({
           <span
             className={cn(
               "inline-flex items-center gap-0.5 font-semibold",
-              up ? "text-[color:var(--success)]" : "text-danger"
+              up ? "text-[color:var(--success)]" : "text-destructive"
             )}
           >
             {up ? "▲" : "▼"} {Math.abs(delta! * 100).toFixed(1)}%
           </span>
-          <span className="text-faint">vs prev period</span>
+          <span className="text-muted-foreground">vs prev period</span>
         </div>
       ) : (
-        <div className="mt-2 text-xs text-faint">&nbsp;</div>
+        <div className="mt-2 text-xs text-muted-foreground">&nbsp;</div>
       )}
     </Card>
   );

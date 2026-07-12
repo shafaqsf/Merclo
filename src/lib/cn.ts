@@ -1,4 +1,5 @@
-/** Join class names, dropping falsy values. Tiny clsx substitute (no deps). */
-export function cn(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
-}
+/**
+ * Class-name merge helper. Re-exported from the shadcn utils module so the
+ * whole app shares a single `cn` (clsx + tailwind-merge).
+ */
+export { cn } from "./utils";

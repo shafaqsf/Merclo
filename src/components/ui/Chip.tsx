@@ -9,8 +9,8 @@ export function Chip({
   return (
     <button
       className={cn(
-        "glass-panel glass-interactive inline-flex items-center gap-1 !rounded-full px-3 py-1 text-[13px] font-medium text-ink",
-        "hover:border-accent hover:text-accent disabled:opacity-50",
+        "inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-[13px] font-medium text-foreground transition-colors",
+        "hover:bg-muted disabled:opacity-50",
         className
       )}
       {...props}
