@@ -102,17 +102,20 @@ in `src/lib/db/*`.
 | `list_knowledge` | read | `listKnowledge(botId)` |
 | `add_knowledge` | write | `addKnowledge(...)` |
 | `delete_knowledge` | write | `deleteKnowledge(id)` |
-| `list_conversations` | read | `listConversationSummaries(...)` (owner-scoped) |
-| `get_conversation` | read | `getConversation(id)` (owner-scoped) |
-| `delete_conversation` | write | `deleteConversation(id)` (owner-scoped) |
-| `get_analytics` | read | `getAnalyticsOverview(...)` |
+| `list_conversations` | read | `listConversationsForOwner()` (RLS owner-scoped) |
+| `get_conversation` | read | `getConversationForOwner(id)` (RLS owner-scoped) |
+| `delete_conversation` | write | `deleteConversationForOwner(id)` (**new** helper) |
+| `get_analytics` | read | `getDashboardStats()` |
 
-**Ownership for conversation tools:** `conversations` has no RLS policy and its
-helpers use the admin client. The copilot's conversation tools must therefore
-enforce ownership explicitly: resolve the set of bot ids the user owns via the
-RLS-scoped bots layer, and refuse to read/delete any conversation whose `bot_id`
-is not in that set. Bots and knowledge tools rely on RLS directly (cookie-bound
-client), as those layers already do.
+**Ownership for conversation tools:** `conversations` already has an
+owner-scoped RLS **read** policy ("owners read their bots' conversations"), so
+`listConversationsForOwner()` / `getConversationForOwner(id)` via the
+cookie-bound client are safe as-is — no manual filtering needed. There is
+currently **no** conversation delete helper, so `delete_conversation` requires a
+new `deleteConversationForOwner(id)` in `src/lib/db/conversations.ts` that first
+confirms ownership by calling `getConversationForOwner(id)` (returns null if not
+the user's, under RLS) and only then deletes. Bots, knowledge, and analytics
+tools rely on their existing RLS-scoped cookie-bound helpers directly.
 
 The valid tool set for `allowed_tools` on bots (`src/lib/tools/schema.ts`) is
 unrelated to these copilot tools and is untouched.
