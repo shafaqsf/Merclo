@@ -3,22 +3,22 @@ import { Wrench } from "lucide-react";
 import { getConversationForOwner } from "@/lib/db/conversations";
 import type { ConversationStatus } from "@/lib/db/conversations";
 import { listBots } from "@/lib/db/bots";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { ButtonLink } from "@/components/ui/Button";
+import { Card, CardBody } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
 
 function formatDate(value: string): string {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString();
 }
 
-const STATUS_TONES: Record<
+const STATUS_VARIANTS: Record<
   ConversationStatus,
-  "accent" | "warning" | "neutral"
+  "default" | "outline" | "secondary"
 > = {
-  active: "accent",
-  awaiting_tool: "warning",
-  closed: "neutral",
+  active: "default",
+  awaiting_tool: "outline",
+  closed: "secondary",
 };
 
 const STATUS_LABELS: Record<ConversationStatus, string> = {
@@ -119,7 +119,7 @@ function MessageBlock({ raw }: { raw: unknown }) {
   if (role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-sm text-accent-ink">
+        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
           <p className="whitespace-pre-wrap break-words">{text || "—"}</p>
         </div>
       </div>
@@ -194,7 +194,7 @@ export default async function ConversationPage({
                 <h1 className="text-2xl font-semibold tracking-tight text-ink">
                   {botName}
                 </h1>
-                <Badge tone={STATUS_TONES[conversation.status]}>
+                <Badge variant={STATUS_VARIANTS[conversation.status]}>
                   {STATUS_LABELS[conversation.status]}
                 </Badge>
               </div>

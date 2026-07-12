@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/Field";
 
 export default function LoginPage() {
@@ -67,7 +67,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <span className="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-accent text-xl font-semibold text-accent-ink shadow-[var(--shadow-md)]">
+          <span className="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-primary text-xl font-semibold text-primary-foreground shadow-[var(--shadow-md)]">
             M
           </span>
           <h1 className="text-[26px] font-semibold tracking-tight text-ink">
@@ -141,7 +141,7 @@ export default function LoginPage() {
                   setError(null);
                   setMessage(null);
                 }}
-                className="font-medium text-accent hover:underline"
+                className="font-medium text-foreground underline-offset-4 hover:underline"
               >
                 Sign up
               </button>
@@ -156,7 +156,7 @@ export default function LoginPage() {
                   setError(null);
                   setMessage(null);
                 }}
-                className="font-medium text-accent hover:underline"
+                className="font-medium text-foreground underline-offset-4 hover:underline"
               >
                 Sign in
               </button>

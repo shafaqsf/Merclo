@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { toast } from "sonner";
 import { createBrowserSupabase } from "@/lib/supabase/client";
-import { Card, CardHeader, CardBody } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Card, CardHeader, CardBody } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/Field";
 import DeleteAccount from "./_components/DeleteAccount";
 
@@ -71,6 +72,7 @@ export default function SettingsPage() {
         return;
       }
       setPasswordSuccess("Password updated successfully.");
+      toast.success("Password updated successfully.");
       setPassword("");
       setConfirmPassword("");
     } catch (err) {

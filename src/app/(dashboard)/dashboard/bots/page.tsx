@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listBots } from "@/lib/db/bots";
-import { Card, CardBody } from "@/components/ui/Card";
-import { ButtonLink } from "@/components/ui/Button";
+import { Card, CardBody } from "@/components/ui/card";
+import { ButtonLink } from "@/components/ui/button";
 
 export default async function BotsPage() {
   const bots = await listBots();
@@ -52,7 +52,7 @@ export default async function BotsPage() {
                     </p>
                   </div>
                   <span
-                    className="flex shrink-0 items-center gap-1 text-sm text-faint transition-colors group-hover:text-accent"
+                    className="flex shrink-0 items-center gap-1 text-sm text-faint transition-colors group-hover:text-foreground"
                     aria-hidden
                   >
                     Edit

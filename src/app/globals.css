@@ -1,124 +1,128 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@custom-variant dark (&:is(.dark *));
 
 /*
- * Merclo design system — Apple-inspired.
- * Calm, high-contrast, generous whitespace, monochrome ink accent, pill buttons,
- * soft rounded surfaces, translucent chrome. Tokens below drive Tailwind
- * utilities (bg-canvas, text-ink, border-hairline, rounded-*, etc.) and are
- * defined once so light/dark stay consistent across every page.
+ * Merclo design system — flat black & white.
+ * Fixed light theme (no OS dark auto-switch, no black backgrounds), strictly
+ * monochrome with neutral greys for hierarchy, no translucency / blur / glass.
+ * Built on shadcn/ui tokens (--background, --foreground, --primary, ...) with
+ * legacy aliases (--color-canvas, --color-ink, ...) kept so pre-existing
+ * utility classes keep working while components migrate to shadcn.
  */
 
 :root {
-  --canvas: #ffffff; /* page background (pure white) */
-  --surface: #ffffff; /* cards / panels */
-  --surface-2: #fbfbfd; /* subtle inset surfaces */
-  --elevated: #ffffff; /* popovers / sticky chrome */
-  --ink: #000000; /* primary text (pure black) */
-  --muted: #6e6e73; /* secondary text */
-  --faint: #86868b; /* tertiary text / captions */
-  --hairline: rgba(0, 0, 0, 0.08); /* borders */
-  --hairline-strong: rgba(0, 0, 0, 0.14);
-  --accent: #000000; /* monochrome black accent */
-  --accent-hover: #1d1d1f;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(0, 0, 0, 0.08);
-  --danger: #ff3b30;
-  --danger-soft: rgba(255, 59, 48, 0.1);
-  --success: #34c759;
-  --warning: #ff9f0a;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --radius: 0.625rem;
 
-  /* Dark sidebar chrome (constant across light/dark app body). */
-  --sidebar: #0b0b0f;
-  --sidebar-surface: rgba(255, 255, 255, 0.06);
-  --sidebar-ink: #f5f5f7;
-  --sidebar-muted: #9a9aa2;
-  --sidebar-hairline: rgba(255, 255, 255, 0.08);
+  /* shadcn/ui core tokens — monochrome neutral scale. */
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #0a0a0a;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #a1a1aa;
 
-  /* Liquid Glass tokens (iOS 26 / macOS Tahoe style). */
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-bg-strong: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-highlight: rgba(255, 255, 255, 0.9);
-  --glass-sheen: rgba(255, 255, 255, 0.35);
-  --glass-blur: 20px;
-  --glass-saturate: 1.8;
-  --shadow-glass-sm: 0 1px 1px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  --shadow-glass-md: 0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --shadow-glass-lg: 0 4px 8px rgba(0, 0, 0, 0.05), 0 20px 48px rgba(0, 0, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  --radius-squircle: 1.5rem;
-}
+  /* Functional status hues (semantic feedback only — kept minimal). */
+  --success: #16a34a;
+  --warning: #d97706;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --canvas: #000000;
-    --surface: #1c1c1e;
-    --surface-2: #2c2c2e;
-    --elevated: #2c2c2e;
-    --ink: #f5f5f7;
-    --muted: #a1a1a6;
-    --faint: #8e8e93;
-    --hairline: rgba(255, 255, 255, 0.1);
-    --hairline-strong: rgba(255, 255, 255, 0.16);
-    --accent: #f5f5f7; /* monochrome ink accent (inverted for dark mode) */
-    --accent-hover: #ffffff;
-    --accent-ink: #1c1c1e;
-    --accent-soft: rgba(245, 245, 247, 0.14);
-    --danger: #ff453a;
-    --danger-soft: rgba(255, 69, 58, 0.16);
-    --success: #30d158;
-    --warning: #ff9f0a;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
+  /* Sidebar (shadcn sidebar tokens) — light rail. */
+  --sidebar: #fafafa;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #0a0a0a;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #a1a1aa;
 
-    --glass-bg: rgba(28, 28, 30, 0.55);
-    --glass-bg-strong: rgba(28, 28, 30, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-highlight: rgba(255, 255, 255, 0.22);
-    --glass-sheen: rgba(255, 255, 255, 0.06);
-    --shadow-glass-sm: 0 1px 1px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.35),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    --shadow-glass-md: 0 2px 4px rgba(0, 0, 0, 0.35), 0 8px 28px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    --shadow-glass-lg: 0 4px 8px rgba(0, 0, 0, 0.4), 0 24px 56px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  }
+  /* Flat shadow scale (restrained, no inset specular highlights). */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* ---- Legacy aliases (map old design-system names → new tokens) ---- */
+  --canvas: var(--background);
+  --surface: var(--card);
+  --surface-2: var(--muted);
+  --elevated: var(--popover);
+  --ink: var(--foreground);
+  --faint: #a1a1aa;
+  --hairline: var(--border);
+  --hairline-strong: #d4d4d8;
+  --accent-hover: #262626;
+  --accent-ink: var(--primary-foreground);
+  --accent-soft: #f4f4f5;
+  --danger: var(--destructive);
+  --danger-soft: #fdecec;
 }
 
 @theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /* shadcn color utilities. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  /* Legacy color utilities (bg-canvas, text-ink, border-hairline, ...). */
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-elevated: var(--elevated);
   --color-ink: var(--ink);
-  --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-hairline: var(--hairline);
   --color-hairline-strong: var(--hairline-strong);
-  --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-surface: var(--sidebar-surface);
-  --color-sidebar-ink: var(--sidebar-ink);
-  --color-sidebar-muted: var(--sidebar-muted);
-  --color-sidebar-hairline: var(--sidebar-hairline);
-
-  --radius-lg: 1rem;
-  --radius-xl: 1.375rem;
-  --radius-2xl: 1.75rem;
-  --radius-squircle: var(--radius-squircle);
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -130,7 +134,7 @@
 }
 
 * {
-  border-color: var(--hairline);
+  border-color: var(--border);
 }
 
 html {
@@ -140,21 +144,21 @@ html {
 }
 
 body {
-  background: var(--canvas);
-  color: var(--ink);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
   letter-spacing: -0.011em;
 }
 
-/* Focus ring — soft monochrome halo. */
+/* Focus ring — monochrome. */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 4px var(--accent-soft);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 45%, transparent);
   border-radius: inherit;
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: color-mix(in oklch, var(--foreground) 12%, transparent);
 }
 
 /* Thin, unobtrusive scrollbars. */
@@ -171,36 +175,27 @@ body {
   border-radius: 999px;
 }
 
-/* Liquid Glass utility — translucent, blurred, specular-highlighted panel. */
+/*
+ * Transitional flat aliases for the removed Liquid Glass classes.
+ * The glass OPTIC (translucency/blur) is gone — these now render as plain flat
+ * surfaces so any not-yet-migrated component still looks correct. Remove once
+ * every usage has moved to shadcn primitives.
+ */
 .glass-panel {
-  position: relative;
-  background: linear-gradient(180deg, var(--glass-sheen), transparent 40%),
-    var(--glass-bg);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-glass-md);
-  border-radius: var(--radius-2xl);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
 }
-
 .glass-panel-strong {
-  background: linear-gradient(180deg, var(--glass-sheen), transparent 40%),
-    var(--glass-bg-strong);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-glass-lg);
-  border-radius: var(--radius-2xl);
+  background: var(--popover);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
 }
-
 .glass-interactive {
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease,
-    background 0.18s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .glass-interactive:hover {
-  box-shadow: var(--shadow-glass-lg);
-}
-.glass-interactive:active {
-  transform: scale(0.97);
-  box-shadow: var(--shadow-glass-sm);
+  box-shadow: var(--shadow-md);
 }

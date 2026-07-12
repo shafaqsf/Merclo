@@ -2,15 +2,26 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardBody } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Card, CardHeader, CardBody } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const CONFIRM_PHRASE = "DELETE";
 
 export default function DeleteAccount() {
   const router = useRouter();
-  const [confirming, setConfirming] = useState(false);
+  const [open, setOpen] = useState(false);
   const [phrase, setPhrase] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +47,9 @@ export default function DeleteAccount() {
   }
 
   return (
-    <Card className="border-danger/30">
-      <CardHeader className="border-danger/20 bg-danger-soft">
-        <h2 className="text-base font-semibold tracking-tight text-danger">
+    <Card className="border-destructive/30">
+      <CardHeader className="border-destructive/20 bg-destructive/10">
+        <h2 className="text-base font-semibold tracking-tight text-destructive">
           Danger zone
         </h2>
         <p className="mt-0.5 text-sm text-muted">
@@ -47,65 +58,68 @@ export default function DeleteAccount() {
         </p>
       </CardHeader>
       <CardBody>
-        {!confirming ? (
-          <Button
-            type="button"
-            variant="danger"
-            onClick={() => {
-              setConfirming(true);
+        <AlertDialog
+          open={open}
+          onOpenChange={(next) => {
+            setOpen(next);
+            if (!next) {
+              setPhrase("");
               setError(null);
-            }}
-          >
-            Delete account
-          </Button>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-ink">
-              Type{" "}
-              <span className="font-mono font-semibold text-danger">
-                {CONFIRM_PHRASE}
-              </span>{" "}
-              to confirm permanent deletion.
-            </p>
-            <Input
-              type="text"
-              value={phrase}
-              onChange={(e) => setPhrase(e.target.value)}
-              autoComplete="off"
-              className="max-w-xs"
-              placeholder={CONFIRM_PHRASE}
-            />
+            }
+          }}
+        >
+          <AlertDialogTrigger asChild>
+            <Button type="button" variant="destructive">
+              Delete account
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete account?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes your account, all of your bots, and all
+                of your conversations. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
 
-            {error ? (
-              <p className="text-sm text-danger" role="alert">
-                {error}
+            <div className="space-y-3">
+              <p className="text-sm text-ink">
+                Type{" "}
+                <span className="font-mono font-semibold text-destructive">
+                  {CONFIRM_PHRASE}
+                </span>{" "}
+                to confirm.
               </p>
-            ) : null}
+              <Input
+                type="text"
+                value={phrase}
+                onChange={(e) => setPhrase(e.target.value)}
+                autoComplete="off"
+                placeholder={CONFIRM_PHRASE}
+              />
+              {error ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              ) : null}
+            </div>
 
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="danger"
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
                 disabled={phrase !== CONFIRM_PHRASE || deleting}
-                onClick={handleDelete}
-              >
-                {deleting ? "Deleting…" : "Permanently delete"}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={deleting}
-                onClick={() => {
-                  setConfirming(false);
-                  setPhrase("");
-                  setError(null);
+                onClick={(e) => {
+                  // Keep the dialog open while the async request runs (and on error).
+                  e.preventDefault();
+                  void handleDelete();
                 }}
               >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
+                {deleting ? "Deleting…" : "Permanently delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardBody>
     </Card>
   );

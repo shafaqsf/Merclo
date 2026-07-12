@@ -6,11 +6,12 @@ import Link from "next/link";
 import { ALL_TOOL_NAMES, TOOL_DEFINITIONS } from "@/lib/tools/schema";
 import { buildEmbedSnippet } from "@/lib/embed";
 import type { Bot } from "@/lib/db/bots";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
+import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/Field";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 import { BotTabs } from "./_components/BotTabs";
 import { cn } from "@/lib/cn";
 
@@ -208,14 +209,14 @@ export default function EditBotPage({
                     key={tool}
                     className={cn(
                       "flex cursor-pointer items-start gap-3 rounded-xl px-4 py-3 transition-colors",
-                      active ? "bg-accent-soft" : "hover:bg-surface-2"
+                      active ? "bg-muted" : "hover:bg-surface-2"
                     )}
                   >
                     <input
                       type="checkbox"
                       checked={active}
                       onChange={() => toggleTool(tool)}
-                      className="mt-0.5 h-4 w-4 accent-[color:var(--accent)]"
+                      className="mt-0.5 h-4 w-4 accent-[color:var(--primary)]"
                     />
                     <span className="min-w-0">
                       <span className="flex flex-wrap items-center gap-2">
@@ -223,7 +224,7 @@ export default function EditBotPage({
                           {tool}
                         </span>
                         {def.mutating && (
-                          <Badge tone="warning">mutating</Badge>
+                          <Badge variant="outline">mutating</Badge>
                         )}
                       </span>
                       <span className="mt-1 block text-xs text-muted">
@@ -246,7 +247,7 @@ export default function EditBotPage({
           <Button type="submit" disabled={saving || !name.trim()}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
-          <Button type="button" variant="danger" onClick={handleDelete}>
+          <Button type="button" variant="destructive" onClick={handleDelete}>
             Delete
           </Button>
         </div>
@@ -261,7 +262,7 @@ export default function EditBotPage({
           </p>
         </CardHeader>
         <CardBody className="space-y-3 p-5">
-          <pre className="overflow-x-auto rounded-xl bg-[#1d1d1f] px-4 py-3.5 text-xs leading-relaxed text-[#f5f5f7]">
+          <pre className="overflow-x-auto rounded-xl border border-border bg-muted px-4 py-3.5 text-xs leading-relaxed text-foreground">
             <code>{snippet}</code>
           </pre>
           <div className="flex justify-end">

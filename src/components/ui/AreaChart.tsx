@@ -47,8 +47,8 @@ export function AreaChart({
     >
       <defs>
         <linearGradient id={`area-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--foreground)" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="var(--foreground)" stopOpacity="0" />
         </linearGradient>
       </defs>
 
@@ -59,7 +59,7 @@ export function AreaChart({
           x2={W - padX}
           y1={gy}
           y2={gy}
-          stroke="var(--hairline)"
+          stroke="var(--border)"
           strokeWidth="1"
         />
       ))}
@@ -69,7 +69,7 @@ export function AreaChart({
         <polyline
           points={line}
           fill="none"
-          stroke="var(--accent)"
+          stroke="var(--foreground)"
           strokeWidth="2.5"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -82,8 +82,8 @@ export function AreaChart({
           cx={p.px}
           cy={p.py}
           r="3"
-          fill="var(--surface)"
-          stroke="var(--accent)"
+          fill="var(--background)"
+          stroke="var(--foreground)"
           strokeWidth="2"
           vectorEffect="non-scaling-stroke"
         />
@@ -95,7 +95,7 @@ export function AreaChart({
           x={x(i)}
           y={H - 8}
           textAnchor="middle"
-          className="fill-[color:var(--faint)]"
+          className="fill-[color:var(--muted-foreground)]"
           style={{ fontSize: "11px" }}
         >
           {d.label}

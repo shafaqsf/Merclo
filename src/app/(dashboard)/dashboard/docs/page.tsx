@@ -1,5 +1,5 @@
-import { Card, CardBody } from "@/components/ui/Card";
-import { ButtonLink } from "@/components/ui/Button";
+import { Card, CardBody } from "@/components/ui/card";
+import { ButtonLink } from "@/components/ui/button";
 import { HOW_IT_WORKS, SETUP_STEPS } from "@/lib/docs";
 
 export const metadata = {
@@ -28,7 +28,7 @@ export default function DocsPage() {
           {HOW_IT_WORKS.map((card, i) => (
             <Card key={card.title}>
               <CardBody className="space-y-3">
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-soft text-[15px] font-semibold text-accent">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-muted text-[15px] font-semibold text-foreground">
                   {i + 1}
                 </span>
                 <h3 className="text-[15px] font-semibold text-ink">
@@ -53,7 +53,7 @@ export default function DocsPage() {
               <Card>
                 <CardBody className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-start gap-4">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent text-[14px] font-semibold text-accent-ink">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-[14px] font-semibold text-primary-foreground">
                       {i + 1}
                     </span>
                     <div className="space-y-1">

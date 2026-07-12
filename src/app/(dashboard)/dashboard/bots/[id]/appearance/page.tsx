@@ -6,11 +6,12 @@ import {
   resolveAppearance,
   type WidgetAppearance,
 } from "@/lib/bots/appearance";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
+import { Card, CardBody } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/Field";
-import { Switch } from "@/components/ui/Switch";
+import { Switch } from "@/components/ui/switch";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { BotTabs } from "../_components/BotTabs";
 import { WidgetPreview } from "../_components/WidgetPreview";
@@ -266,12 +267,19 @@ export default function AppearancePage({
                 />
               </Field>
 
-              <Switch
-                id="showProductCards"
-                checked={state.showProductCards}
-                onChange={(checked) => update("showProductCards", checked)}
-                label="Show product cards in chat"
-              />
+              <label
+                htmlFor="showProductCards"
+                className="flex cursor-pointer items-center gap-3 text-sm text-ink"
+              >
+                <Switch
+                  id="showProductCards"
+                  checked={state.showProductCards}
+                  onCheckedChange={(checked) =>
+                    update("showProductCards", checked)
+                  }
+                />
+                Show product cards in chat
+              </label>
             </CardBody>
           </Card>
 
@@ -327,12 +335,19 @@ export default function AppearancePage({
 
           <Card>
             <CardBody className="space-y-5 p-6">
-              <Switch
-                id="proactiveEnabled"
-                checked={state.proactive.enabled}
-                onChange={(checked) => updateProactive("enabled", checked)}
-                label={<span className="font-medium">Proactive greeting</span>}
-              />
+              <label
+                htmlFor="proactiveEnabled"
+                className="flex cursor-pointer items-center gap-3 text-sm text-ink"
+              >
+                <Switch
+                  id="proactiveEnabled"
+                  checked={state.proactive.enabled}
+                  onCheckedChange={(checked) =>
+                    updateProactive("enabled", checked)
+                  }
+                />
+                <span className="font-medium">Proactive greeting</span>
+              </label>
 
               <Field
                 label="Delay (ms)"

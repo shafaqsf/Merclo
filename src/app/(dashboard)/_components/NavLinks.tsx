@@ -99,10 +99,10 @@ export default function NavLinks() {
             key={link.href}
             href={link.href}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.97]",
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               active
-                ? "bg-sidebar-surface text-sidebar-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                : "text-sidebar-muted hover:bg-sidebar-surface/60 hover:text-sidebar-ink"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
             )}
           >
             <Icon name={link.icon} />

@@ -2,11 +2,12 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
+import { Card, CardBody } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/Field";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
 import { BotTabs } from "../_components/BotTabs";
 
@@ -30,13 +31,13 @@ const KIND_LABEL: Record<KnowledgeKind, string> = {
   note: "Note",
 };
 
-const KIND_TONE: Record<
+const KIND_VARIANT: Record<
   KnowledgeKind,
-  "accent" | "warning" | "neutral"
+  "default" | "outline" | "secondary"
 > = {
-  faq: "accent",
-  policy: "warning",
-  note: "neutral",
+  faq: "default",
+  policy: "outline",
+  note: "secondary",
 };
 
 const selectClass =
@@ -410,7 +411,7 @@ function KnowledgeItem({
               <h3 className="truncate text-base font-medium text-ink">
                 {entry.title}
               </h3>
-              <Badge tone={KIND_TONE[entry.kind]}>
+              <Badge variant={KIND_VARIANT[entry.kind]}>
                 {KIND_LABEL[entry.kind]}
               </Badge>
             </div>

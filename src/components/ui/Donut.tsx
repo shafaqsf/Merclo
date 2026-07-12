@@ -25,15 +25,15 @@ export function Donut({
   const segments = data.filter((d) => d.value > 0);
   const total = segments.reduce((sum, d) => sum + d.value, 0);
 
-  // Accent-family palette (opacity ramp of the accent color) so it stays
-  // on-brand and works in both light and dark.
+  // Monochrome ink ramp (opacity steps of the foreground color) so the chart
+  // stays strictly black & white.
   const colors = [
-    "var(--accent)",
-    "color-mix(in srgb, var(--accent) 80%, transparent)",
-    "color-mix(in srgb, var(--accent) 62%, transparent)",
-    "color-mix(in srgb, var(--accent) 46%, transparent)",
-    "color-mix(in srgb, var(--accent) 32%, transparent)",
-    "color-mix(in srgb, var(--accent) 22%, transparent)",
+    "var(--foreground)",
+    "color-mix(in srgb, var(--foreground) 80%, transparent)",
+    "color-mix(in srgb, var(--foreground) 62%, transparent)",
+    "color-mix(in srgb, var(--foreground) 46%, transparent)",
+    "color-mix(in srgb, var(--foreground) 32%, transparent)",
+    "color-mix(in srgb, var(--foreground) 20%, transparent)",
   ];
 
   if (segments.length === 0 || total === 0) {
@@ -45,11 +45,11 @@ export function Donut({
         )}
       >
         <div
-          className="rounded-full border-8 border-hairline"
+          className="rounded-full border-8 border-border"
           style={{ width: size, height: size }}
           aria-hidden
         />
-        <p className="text-sm text-faint">No data yet.</p>
+        <p className="text-sm text-muted-foreground">No data yet.</p>
       </div>
     );
   }
@@ -90,7 +90,7 @@ export function Donut({
             cy={cy}
             r={radius}
             fill="none"
-            stroke="var(--hairline)"
+            stroke="var(--border)"
             strokeWidth={thickness}
           />
           {arcs.map((a, i) => (
@@ -109,10 +109,10 @@ export function Donut({
           ))}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-semibold tracking-tight text-ink">
+          <span className="text-2xl font-semibold tracking-tight text-foreground">
             {total.toLocaleString()}
           </span>
-          <span className="text-xs text-faint">total</span>
+          <span className="text-xs text-muted-foreground">total</span>
         </div>
       </div>
 
@@ -124,8 +124,8 @@ export function Donut({
               style={{ background: colors[i % colors.length] }}
               aria-hidden
             />
-            <span className="min-w-0 flex-1 truncate text-ink">{d.label}</span>
-            <span className="shrink-0 tabular-nums text-muted">{d.value}</span>
+            <span className="min-w-0 flex-1 truncate text-foreground">{d.label}</span>
+            <span className="shrink-0 tabular-nums text-muted-foreground">{d.value}</span>
           </li>
         ))}
       </ul>

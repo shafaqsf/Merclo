@@ -2,21 +2,21 @@ import Link from "next/link";
 import { listConversationsForOwner } from "@/lib/db/conversations";
 import type { ConversationStatus } from "@/lib/db/conversations";
 import { listBots } from "@/lib/db/bots";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { Card, CardBody } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 function formatDate(value: string): string {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString();
 }
 
-const STATUS_TONES: Record<
+const STATUS_VARIANTS: Record<
   ConversationStatus,
-  "accent" | "warning" | "neutral"
+  "default" | "outline" | "secondary"
 > = {
-  active: "accent",
-  awaiting_tool: "warning",
-  closed: "neutral",
+  active: "default",
+  awaiting_tool: "outline",
+  closed: "secondary",
 };
 
 const STATUS_LABELS: Record<ConversationStatus, string> = {
@@ -26,7 +26,9 @@ const STATUS_LABELS: Record<ConversationStatus, string> = {
 };
 
 function StatusBadge({ status }: { status: ConversationStatus }) {
-  return <Badge tone={STATUS_TONES[status]}>{STATUS_LABELS[status]}</Badge>;
+  return (
+    <Badge variant={STATUS_VARIANTS[status]}>{STATUS_LABELS[status]}</Badge>
+  );
 }
 
 export default async function ConversationsPage() {

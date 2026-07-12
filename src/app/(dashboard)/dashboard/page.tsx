@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { getDashboardStats, type DashboardStats } from "@/lib/db/analytics";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { ButtonLink } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { ButtonLink } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/StatCard";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 import { Donut } from "@/components/ui/Donut";
 import { AreaChart } from "@/components/ui/AreaChart";
 
@@ -126,9 +126,9 @@ function ToolUsage({ data }: { data: DashboardStats["toolUsage"] }) {
                   <span className="truncate font-medium text-ink">{t.name}</span>
                   <span className="ml-2 shrink-0 text-muted">{t.count}</span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-accent-soft">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-accent transition-all duration-300"
+                    className="h-full rounded-full bg-primary transition-all duration-300"
                     style={{ width: `${(t.count / max) * 100}%` }}
                     aria-hidden
                   />
@@ -164,10 +164,10 @@ function RecentActivity({ data }: { data: DashboardStats["perBot"] }) {
                   href={`/dashboard/bots/${b.botId}`}
                   className="group flex items-center justify-between gap-3 py-3 transition-colors"
                 >
-                  <span className="truncate text-sm font-medium text-ink group-hover:text-accent">
+                  <span className="truncate text-sm font-medium text-ink group-hover:text-foreground">
                     {b.name}
                   </span>
-                  <Badge tone="neutral">
+                  <Badge variant="secondary">
                     {b.conversationCount.toLocaleString()} conv.
                   </Badge>
                 </Link>
@@ -230,9 +230,9 @@ function QuickActions() {
             <Link
               key={a.href}
               href={a.href}
-              className="group flex flex-col items-center justify-center gap-2 rounded-xl border border-hairline bg-surface-2 px-3 py-5 text-center transition-colors hover:border-accent hover:bg-accent-soft"
+              className="group flex flex-col items-center justify-center gap-2 rounded-xl border border-hairline bg-surface-2 px-3 py-5 text-center transition-colors hover:border-hairline-strong hover:bg-muted"
             >
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-surface text-accent shadow-[var(--shadow-sm)]">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-surface text-foreground shadow-[var(--shadow-sm)]">
                 {a.icon}
               </span>
               <span className="text-[13px] font-medium text-ink">{a.label}</span>
@@ -317,26 +317,22 @@ export default async function DashboardPage() {
           value={stats.conversationCount.toLocaleString()}
           delta={delta(stats.conversationCount, stats.prev.conversationCount)}
           icon={ICONS.chat}
-          tone="blue"
         />
         <StatCard
           label="Active bots"
           value={stats.botCount.toLocaleString()}
           icon={ICONS.bot}
-          tone="purple"
         />
         <StatCard
           label="Messages"
           value={stats.messageCount.toLocaleString()}
           delta={delta(stats.messageCount, stats.prev.messageCount)}
           icon={ICONS.message}
-          tone="green"
         />
         <StatCard
           label="Cart adds"
           value={stats.cartAdds.toLocaleString()}
           icon={ICONS.cart}
-          tone="orange"
         />
       </div>
 

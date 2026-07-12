@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/cn";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface AvatarUploadProps {
   botId: string;
@@ -59,7 +59,7 @@ export function AvatarUpload({ botId, value, onChange }: AvatarUploadProps) {
         onClick={() => inputRef.current?.click()}
         className={cn(
           "flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-hairline-strong bg-surface-2 p-4 transition-colors",
-          dragOver && "border-accent bg-accent-soft"
+          dragOver && "border-foreground bg-muted"
         )}
       >
         {value ? (
