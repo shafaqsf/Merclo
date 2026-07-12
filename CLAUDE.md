@@ -41,7 +41,7 @@ Security: `/api/chat/turn` validates the request `Origin` against the bot's `all
 
 ## Project status
 
-Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and **account settings** (`/dashboard/settings` + `/api/account`). Not yet exercised end-to-end against a live Shopify store.
+Foundational scaffold plus the four dashboard panels are in place: bot CRUD, **analytics overview** (`src/lib/db/analytics.ts`), **conversations viewer** (`/dashboard/conversations`), **bot playground** (`/dashboard/bots/[id]/playground` + `/api/playground/turn`, uses client-side mock storefront tools), and **account settings** (`/dashboard/settings` + `/api/account`). A merchant-facing **Docs panel** (`/dashboard/docs`, content in `src/lib/docs.ts`) explains how the app works and the steps to a running bot. Not yet exercised end-to-end against a live Shopify store.
 
 Note: `.env.local` (gitignored) holds real secrets — never paste keys into the tracked `.env.example`.
 
@@ -53,6 +53,7 @@ The UI follows an Apple-inspired design system. Tokens live in `src/app/globals.
 
 - **Test-driven development**: write a failing test before implementing the corresponding code, for all new features and bug fixes.
 - **Commit frequently**: make small commits with clear, meaningful messages as work progresses, rather than one large commit at the end.
+- **Keep the in-app Docs panel current**: the merchant-facing guide at `/dashboard/docs` (content in `src/lib/docs.ts`, unit-tested via `src/lib/docs.test.ts`) explains how Merclo works and the steps to a running bot. Whenever a feature changes what merchants do or how they set up a bot, update `src/lib/docs.ts` **as part of the same feature** — don't wait to be asked. This is a required part of "done" for any merchant-facing feature.
 - **Non-feature changes** (small fixes, config, docs not tied to a specific feature) may be committed and pushed directly to `main` from the `main` worktree — no branch/worktree needed.
 
 ### Feature workflow, via worktrees
