@@ -52,11 +52,14 @@ The UI follows an Apple-inspired design system. Tokens live in `src/app/globals.
 ## Development workflow
 
 - **Test-driven development**: write a failing test before implementing the corresponding code, for all new features and bug fixes.
-- **Feature branches**: every feature is developed on its own dedicated branch, never directly on `main`.
+- **Feature branches, via worktrees**: every feature is developed on its own dedicated branch, never directly on `main` — and each branch gets its own `git worktree` rather than being checked out in place. This keeps concurrent work (e.g. a feature branch and a same-day hotfix) in separate directories instead of colliding via `git stash`/`checkout` in one working tree.
+  - Start a feature: `git worktree add ../merclo-<feature> -b feature/<name>` (branching from up-to-date `main`), then `cd` into it. Each worktree needs its own `npm install` and `.env.local` (these aren't shared between worktrees).
+  - List active worktrees: `git worktree list`.
+  - Clean up after merging: `git worktree remove ../merclo-<feature>` (git refuses if there are uncommitted changes, so it won't silently discard work), then `git branch -d feature/<name>` in the main worktree.
 - **Commit frequently**: make small commits with clear, meaningful messages as work progresses, rather than one large commit at the end.
 - **Feature completion flow**: once a feature is complete and all tests, build checks, and linting pass:
   1. Push the branch to the remote.
   2. Open a pull request.
   3. Merge the pull request into `main`.
-  4. Synchronize the local repository with the latest remote `main`.
-- **Non-feature changes** (e.g. small fixes, config, docs not tied to a specific feature): commits may be made and pushed directly to `main`.
+  4. Synchronize the main worktree with the latest remote `main`, then remove the feature worktree.
+- **Non-feature changes** (e.g. small fixes, config, docs not tied to a specific feature): commits may be made and pushed directly to `main` from the main worktree.
