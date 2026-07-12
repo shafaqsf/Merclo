@@ -142,46 +142,6 @@ function ToolUsage({ data }: { data: DashboardStats["toolUsage"] }) {
   );
 }
 
-function LiveStatus() {
-  const rows: { label: string; state: "ok" | "warn"; note: string }[] = [
-    { label: "Supabase", state: "ok", note: "Operational" },
-    { label: "OpenRouter", state: "ok", note: "Operational" },
-    { label: "Agent runtime", state: "warn", note: "Degraded" },
-  ];
-  return (
-    <Card className="flex h-full flex-col">
-      <CardHeader>
-        <h3 className="text-sm font-semibold tracking-tight text-ink">
-          Live status
-        </h3>
-        <p className="mt-0.5 text-xs text-faint">Service health</p>
-      </CardHeader>
-      <CardBody className="flex-1">
-        <ul className="space-y-3.5">
-          {rows.map((r) => (
-            <li key={r.label} className="flex items-center justify-between">
-              <span className="flex items-center gap-2.5 text-sm text-ink">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{
-                    background:
-                      r.state === "ok"
-                        ? "var(--success)"
-                        : "var(--warning)",
-                  }}
-                  aria-hidden
-                />
-                {r.label}
-              </span>
-              <span className="text-xs text-faint">{r.note}</span>
-            </li>
-          ))}
-        </ul>
-      </CardBody>
-    </Card>
-  );
-}
-
 function RecentActivity({ data }: { data: DashboardStats["perBot"] }) {
   return (
     <Card className="flex h-full flex-col">
@@ -388,18 +348,13 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <LiveStatus />
         <div className="lg:col-span-2">
           <RecentActivity data={stats.perBot} />
         </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <TopQuestions data={stats.topQuestions} />
-        </div>
         <QuickActions />
       </div>
+
+      <TopQuestions data={stats.topQuestions} />
     </div>
   );
 }

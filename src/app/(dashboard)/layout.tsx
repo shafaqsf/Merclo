@@ -36,18 +36,6 @@ export default async function DashboardLayout({
         <NavLinks />
 
         <div className="mt-auto space-y-3 px-4 pb-4">
-          <div className="rounded-2xl bg-gradient-to-br from-accent to-[color:#6f5bff] p-4 text-white">
-            <p className="text-sm font-semibold">Upgrade to Pro</p>
-            <p className="mt-1 text-xs leading-relaxed text-white/80">
-              Unlock more bots, higher limits, and priority support.
-            </p>
-            <Link
-              href="/dashboard/settings"
-              className="mt-3 inline-flex rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur transition-colors hover:bg-white/25"
-            >
-              Upgrade now
-            </Link>
-          </div>
           <div className="rounded-2xl border border-sidebar-hairline bg-sidebar-surface p-4">
             <p className="text-sm font-semibold text-sidebar-ink">Need help?</p>
             <p className="mt-1 text-xs leading-relaxed text-sidebar-muted">

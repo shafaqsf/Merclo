@@ -39,14 +39,18 @@ export default function Notifications({
           .filter((r) => r.type === "conversation")
           .slice(0, 5);
         setItems(recent);
-      } catch {
-        if (!controller.signal.aborted) setItems([]);
+      } catch (err) {
+        // Ignore aborts (panel closed / re-opened before the request settled).
+        if ((err as Error)?.name === "AbortError" || controller.signal.aborted) {
+          return;
+        }
+        setItems([]);
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
     }, 0);
     return () => {
-      controller.abort();
+      controller.abort(new DOMException("closed", "AbortError"));
       window.clearTimeout(id);
     };
   }, [open]);

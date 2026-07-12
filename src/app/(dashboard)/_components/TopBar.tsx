@@ -57,7 +57,6 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
               onClick={() => setNotifOpen((v) => !v)}
               className="relative grid h-10 w-10 place-items-center rounded-xl border border-hairline bg-surface text-muted transition-colors hover:text-ink"
             >
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-[color:var(--surface)]" />
               <svg
                 className="h-[18px] w-[18px]"
                 viewBox="0 0 24 24"
