@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HOW_IT_WORKS, SETUP_STEPS } from "./docs";
+import { COPILOT_INFO, HOW_IT_WORKS, SETUP_STEPS } from "./docs";
 
 describe("docs content", () => {
   it("has explainer cards with a title and description", () => {
@@ -18,5 +18,16 @@ describe("docs content", () => {
       expect(step.cta.trim()).not.toBe("");
       expect(step.href.startsWith("/dashboard")).toBe(true);
     }
+  });
+
+  it("documents the dashboard copilot", () => {
+    expect(COPILOT_INFO.title.trim()).not.toBe("");
+    expect(COPILOT_INFO.description.trim()).not.toBe("");
+
+    const all = JSON.stringify(COPILOT_INFO);
+    expect(all).toMatch(/copilot/i);
+    expect(all).toMatch(/accept/i);
+    expect(all).toMatch(/auto/i);
+    expect(all).toMatch(/account/i);
   });
 });

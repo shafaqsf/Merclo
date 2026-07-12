@@ -17,6 +17,12 @@ export interface SetupStep {
   cta: string;
 }
 
+export interface CopilotInfo {
+  title: string;
+  description: string;
+  modes: HowItWorksCard[];
+}
+
 export const HOW_IT_WORKS: HowItWorksCard[] = [
   {
     title: "Your shopper chats",
@@ -72,3 +78,21 @@ export const SETUP_STEPS: SetupStep[] = [
     cta: "Open the Playground",
   },
 ];
+
+export const COPILOT_INFO: CopilotInfo = {
+  title: "Dashboard copilot",
+  description:
+    "The copilot is an AI assistant that lives in the dashboard itself, in the panel on the right. It works on your own data — your bots, their knowledge, and your storefront conversations — to help you manage them faster: creating and editing bots, updating knowledge, and reviewing conversations, all through plain-language requests instead of clicking through forms. It never performs account-level actions (billing, login, or account settings) — only bot, knowledge, and conversation changes you could otherwise make yourself in the dashboard.",
+  modes: [
+    {
+      title: "Accept mode",
+      description:
+        "The copilot proposes each change and waits for you to approve it before anything is applied. Use this when you want to review every edit before it takes effect.",
+    },
+    {
+      title: "Auto mode",
+      description:
+        "The copilot applies changes immediately as it makes them, without waiting for approval. Use this when you trust it to move faster on routine updates.",
+    },
+  ],
+};
