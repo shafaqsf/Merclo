@@ -47,12 +47,12 @@ export default function DeleteAccount() {
   }
 
   return (
-    <Card className="border-destructive/30">
-      <CardHeader className="border-destructive/20 bg-destructive/10">
+    <Card className="border-destructive/40">
+      <CardHeader>
         <h2 className="text-base font-semibold tracking-tight text-destructive">
           Danger zone
         </h2>
-        <p className="mt-0.5 text-sm text-muted">
+        <p className="mt-1 text-sm text-foreground">
           Permanently delete your account, all of your bots, and all of your
           conversations. This action cannot be undone.
         </p>

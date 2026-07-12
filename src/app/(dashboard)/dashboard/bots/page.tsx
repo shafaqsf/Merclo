@@ -13,7 +13,7 @@ export default async function BotsPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-ink">
             Bots
           </h1>
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-sm text-foreground">
             Manage the assistants you embed on your storefront.
           </p>
         </div>
@@ -25,7 +25,7 @@ export default async function BotsPage() {
           <CardBody className="flex flex-col items-center gap-4 px-6 py-16 text-center">
             <div>
               <p className="text-base font-medium text-ink">No bots yet</p>
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 text-sm text-foreground">
                 Create your first assistant to embed on your storefront.
               </p>
             </div>
@@ -44,7 +44,7 @@ export default async function BotsPage() {
                 <CardBody className="flex items-center justify-between gap-4 px-5 py-4">
                   <div className="min-w-0">
                     <p className="truncate font-medium text-ink">{bot.name}</p>
-                    <p className="mt-0.5 text-xs text-muted">
+                    <p className="mt-0.5 text-xs text-foreground">
                       {bot.allowed_tools.length} tool
                       {bot.allowed_tools.length === 1 ? "" : "s"} &middot;{" "}
                       {bot.allowed_origins.length} origin
@@ -52,7 +52,7 @@ export default async function BotsPage() {
                     </p>
                   </div>
                   <span
-                    className="flex shrink-0 items-center gap-1 text-sm text-faint transition-colors group-hover:text-foreground"
+                    className="flex shrink-0 items-center gap-1 text-sm text-foreground transition-colors group-hover:text-foreground"
                     aria-hidden
                   >
                     Edit

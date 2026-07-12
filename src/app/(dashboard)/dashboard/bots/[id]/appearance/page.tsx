@@ -130,7 +130,7 @@ export default function AppearancePage({
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-6 py-12 text-sm text-muted">
+      <div className="mx-auto w-full max-w-5xl px-6 py-12 text-sm text-foreground">
         Loading…
       </div>
     );
@@ -145,7 +145,7 @@ export default function AppearancePage({
     <div className="mx-auto w-full max-w-5xl px-6 py-12">
       <Link
         href="/dashboard/bots"
-        className="text-sm text-muted transition-colors hover:text-ink"
+        className="text-sm text-foreground transition-colors hover:text-ink"
       >
         &larr; Back to bots
       </Link>
@@ -155,7 +155,7 @@ export default function AppearancePage({
           Appearance
         </h1>
         {name && (
-          <p className="mt-1 text-sm text-muted">Customize the widget for {name}.</p>
+          <p className="mt-1 text-sm text-foreground">Customize the widget for {name}.</p>
         )}
       </div>
 

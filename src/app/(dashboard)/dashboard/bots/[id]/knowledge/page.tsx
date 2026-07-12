@@ -172,7 +172,7 @@ export default function KnowledgePage({
     <div className="mx-auto w-full max-w-2xl px-6 py-12">
       <Link
         href={`/dashboard/bots/${id}`}
-        className="text-sm text-muted transition-colors hover:text-ink"
+        className="text-sm text-foreground transition-colors hover:text-ink"
       >
         &larr; Back to bot
       </Link>
@@ -185,7 +185,7 @@ export default function KnowledgePage({
         <h1 className="text-3xl font-semibold tracking-tight text-ink">
           Knowledge
         </h1>
-        <p className="mt-1.5 text-sm text-muted">
+        <p className="mt-1.5 text-sm text-foreground">
           Add FAQs, policies, and product info your assistant can answer from.
         </p>
       </div>
@@ -243,7 +243,7 @@ export default function KnowledgePage({
       </Card>
 
       <div className="mt-10 space-y-4">
-        {loading && <p className="text-sm text-muted">Loading…</p>}
+        {loading && <p className="text-sm text-foreground">Loading…</p>}
         {loadError && <p className="text-sm text-danger">{loadError}</p>}
 
         {!loading && !loadError && entries.length === 0 && (
@@ -252,7 +252,7 @@ export default function KnowledgePage({
               <h2 className="text-base font-medium text-ink">
                 No knowledge yet
               </h2>
-              <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
+              <p className="mx-auto mt-1.5 max-w-sm text-sm text-foreground">
                 Add your first entry above. Your assistant will use these to
                 answer customer questions accurately.
               </p>
@@ -415,7 +415,7 @@ function KnowledgeItem({
                 {KIND_LABEL[entry.kind]}
               </Badge>
             </div>
-            <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">
+            <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
               {entry.content}
             </p>
           </div>

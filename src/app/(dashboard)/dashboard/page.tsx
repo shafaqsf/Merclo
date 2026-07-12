@@ -57,17 +57,17 @@ function Header() {
         <h1 className="text-[28px] font-semibold tracking-tight text-ink">
           Welcome back 👋
         </h1>
-        <p className="mt-1.5 text-[15px] text-muted">
+        <p className="mt-1.5 text-[15px] text-foreground">
           Here&apos;s what&apos;s happening across your bots and conversations.
         </p>
       </div>
       <div className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-surface px-3.5 py-2 text-sm font-medium text-ink shadow-[var(--shadow-sm)]">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-muted" aria-hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-foreground" aria-hidden>
           <rect x="3" y="4" width="18" height="17" rx="2" />
           <path d="M3 9h18M8 2v4M16 2v4" strokeLinecap="round" />
         </svg>
         Last 7 days
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-faint" aria-hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-foreground" aria-hidden>
           <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
@@ -92,7 +92,7 @@ function ConversationsChart({
           <h3 className="text-sm font-semibold tracking-tight text-ink">
             Conversations over time
           </h3>
-          <p className="mt-0.5 text-xs text-faint">Last 7 days</p>
+          <p className="mt-0.5 text-xs text-foreground">Last 7 days</p>
         </div>
         <span className="text-2xl font-semibold tracking-tight text-ink">
           {total.toLocaleString()}
@@ -113,18 +113,18 @@ function ToolUsage({ data }: { data: DashboardStats["toolUsage"] }) {
         <h3 className="text-sm font-semibold tracking-tight text-ink">
           Top tools
         </h3>
-        <p className="mt-0.5 text-xs text-faint">Across all conversations</p>
+        <p className="mt-0.5 text-xs text-foreground">Across all conversations</p>
       </CardHeader>
       <CardBody className="flex-1">
         {data.length === 0 ? (
-          <p className="text-sm text-faint">No tools used yet.</p>
+          <p className="text-sm text-foreground">No tools used yet.</p>
         ) : (
           <ul className="space-y-4">
             {data.slice(0, 5).map((t) => (
               <li key={t.name}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
                   <span className="truncate font-medium text-ink">{t.name}</span>
-                  <span className="ml-2 shrink-0 text-muted">{t.count}</span>
+                  <span className="ml-2 shrink-0 text-foreground">{t.count}</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
@@ -152,7 +152,7 @@ function RecentActivity({ data }: { data: DashboardStats["perBot"] }) {
       </CardHeader>
       <CardBody className="flex-1">
         {data.length === 0 ? (
-          <p className="text-sm text-faint">
+          <p className="text-sm text-foreground">
             No bot activity yet. Once conversations come in, your most active
             bots will appear here.
           </p>
@@ -247,7 +247,7 @@ function QuickActions() {
 function Unavailable() {
   return (
     <Card>
-      <CardBody className="flex items-center gap-3 text-sm text-muted">
+      <CardBody className="flex items-center gap-3 text-sm text-foreground">
         <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-[color:var(--warning)]" />
         Analytics unavailable (is the database migrated?)
       </CardBody>
@@ -262,7 +262,7 @@ function EmptyState() {
         <h3 className="text-lg font-semibold tracking-tight text-ink">
           Let&apos;s get you set up
         </h3>
-        <p className="mt-2 max-w-sm text-sm text-muted">
+        <p className="mt-2 max-w-sm text-sm text-foreground">
           Create your first bot and connect your store. Your conversations and
           analytics will show up here.
         </p>

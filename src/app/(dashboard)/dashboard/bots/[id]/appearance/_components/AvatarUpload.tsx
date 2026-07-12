@@ -70,11 +70,11 @@ export function AvatarUpload({ botId, value, onChange }: AvatarUploadProps) {
             className="h-12 w-12 rounded-full object-cover"
           />
         ) : (
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-surface text-xs text-faint">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-surface text-xs text-foreground">
             None
           </div>
         )}
-        <div className="text-sm text-muted">
+        <div className="text-sm text-foreground">
           {uploading
             ? "Uploading…"
             : "Click or drag an image here (PNG, JPEG, WEBP, max 2MB)"}

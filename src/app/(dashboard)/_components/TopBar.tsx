@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CommandPalette from "./CommandPalette";
 import Notifications from "./Notifications";
+import MobileSidebar from "./MobileSidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -45,7 +46,8 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background">
-      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-3 px-6 sm:px-10">
+      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-3 px-4 sm:px-10">
+        <MobileSidebar email={userEmail} />
         <Button
           type="button"
           variant="outline"
@@ -64,9 +66,6 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
             <path d="m20 20-3.5-3.5" strokeLinecap="round" />
           </svg>
           <span className="flex-1 text-left">Search for anything…</span>
-          <kbd className="hidden shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground sm:block">
-            ⌘K
-          </kbd>
         </Button>
 
         <div className="ml-auto flex items-center gap-2.5">

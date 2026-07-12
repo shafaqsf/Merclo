@@ -43,7 +43,7 @@ export default function NewBotPage() {
     <div className="mx-auto w-full max-w-2xl px-6 py-12">
       <Link
         href="/dashboard/bots"
-        className="text-sm text-muted transition-colors hover:text-ink"
+        className="text-sm text-foreground transition-colors hover:text-ink"
       >
         &larr; Back to bots
       </Link>
@@ -51,7 +51,7 @@ export default function NewBotPage() {
       <h1 className="mt-5 text-3xl font-semibold tracking-tight text-ink">
         New bot
       </h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-sm text-foreground">
         Give your assistant a name and an optional persona to get started.
       </p>
 

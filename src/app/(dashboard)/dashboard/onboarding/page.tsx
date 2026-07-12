@@ -31,7 +31,7 @@ function StepIndicator({ current }: { current: number }) {
                   "flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-medium transition-colors",
                   active && "bg-primary text-primary-foreground",
                   done && "bg-muted text-foreground",
-                  !active && !done && "bg-surface-2 text-faint"
+                  !active && !done && "bg-surface-2 text-foreground"
                 )}
               >
                 {done ? "✓" : i + 1}
@@ -39,7 +39,7 @@ function StepIndicator({ current }: { current: number }) {
               <span
                 className={cn(
                   "hidden text-[13px] font-medium sm:block",
-                  active ? "text-ink" : "text-faint"
+                  active ? "text-ink" : "text-foreground"
                 )}
               >
                 {label}
@@ -121,7 +121,7 @@ export default function OnboardingPage() {
             {activeStep === 1 && "Install the widget"}
             {activeStep === 2 && "Try it out"}
           </h1>
-          <p className="text-sm text-muted">
+          <p className="text-sm text-foreground">
             {activeStep === 0 &&
               "Give your assistant a name and personality to get started."}
             {activeStep === 1 &&
@@ -184,7 +184,7 @@ export default function OnboardingPage() {
         <Card>
           <CardBody className="space-y-6 p-8">
             <div className="space-y-2">
-              <p className="text-sm text-muted">
+              <p className="text-sm text-foreground">
                 Paste this snippet into your Shopify theme, just before the
                 closing <code className="text-ink">&lt;/body&gt;</code> tag.
               </p>
@@ -224,7 +224,7 @@ export default function OnboardingPage() {
       {activeStep === 2 && botId && (
         <Card>
           <CardBody className="space-y-6 p-8">
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-sm leading-relaxed text-foreground">
               The Playground is a private sandbox where you can chat with your
               bot exactly as your customers will — test its persona, refine its
               answers, and make sure everything feels right before it goes live.

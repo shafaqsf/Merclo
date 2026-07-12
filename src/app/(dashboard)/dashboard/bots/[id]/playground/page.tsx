@@ -356,7 +356,7 @@ export default function PlaygroundPage({
           <h1 className="text-2xl font-semibold tracking-tight text-ink">
             Playground
           </h1>
-          <p className="mt-1.5 text-xs text-muted">
+          <p className="mt-1.5 text-xs text-foreground">
             Uses mock storefront data — tools return fake products &amp; cart.
           </p>
         </div>
@@ -372,7 +372,7 @@ export default function PlaygroundPage({
       <Card className="mt-6 flex flex-1 flex-col overflow-hidden shadow-[var(--shadow-md)]">
         <div className="flex-1 space-y-3 overflow-y-auto px-5 py-6">
           {transcript.length === 0 && !pending && (
-            <p className="py-12 text-center text-sm text-faint">
+            <p className="py-12 text-center text-sm text-foreground">
               Send a message to test this bot.
             </p>
           )}
@@ -381,7 +381,7 @@ export default function PlaygroundPage({
             if (item.role === "tool") {
               return (
                 <div key={item.id} className="flex justify-center">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-[11px] font-medium text-faint">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-[11px] font-medium text-foreground">
                     <Wrench className="h-3 w-3" aria-hidden />
                     {item.content}
                   </span>
@@ -437,7 +437,7 @@ export default function PlaygroundPage({
                         "grid h-7 w-7 place-items-center rounded-full text-sm transition-colors",
                         vote === "up"
                           ? "bg-muted text-foreground"
-                          : "text-faint hover:bg-surface-2 hover:text-muted"
+                          : "text-foreground hover:bg-surface-2 hover:text-foreground"
                       )}
                     >
                       <ThumbsUp className="h-3.5 w-3.5" aria-hidden />
@@ -451,7 +451,7 @@ export default function PlaygroundPage({
                         "grid h-7 w-7 place-items-center rounded-full text-sm transition-colors",
                         vote === "down"
                           ? "bg-danger-soft text-danger"
-                          : "text-faint hover:bg-surface-2 hover:text-muted"
+                          : "text-foreground hover:bg-surface-2 hover:text-foreground"
                       )}
                     >
                       <ThumbsDown className="h-3.5 w-3.5" aria-hidden />
@@ -514,14 +514,14 @@ function ProductCard({ product }: { product: Product }) {
           className="h-14 w-14 shrink-0 rounded-lg object-cover"
         />
       ) : (
-        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-surface-2 text-faint">
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-surface-2 text-foreground">
           <ShoppingBag className="h-5 w-5" aria-hidden />
         </div>
       )}
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-ink">{product.title}</p>
         {product.price && (
-          <p className="mt-0.5 text-sm text-muted">{product.price}</p>
+          <p className="mt-0.5 text-sm text-foreground">{product.price}</p>
         )}
       </div>
     </div>
