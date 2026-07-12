@@ -9,6 +9,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
   const [notifOpen, setNotifOpen] = useState(false);
 
   const initial = (userEmail.trim()[0] ?? "U").toUpperCase();
+  const name = userEmail.split("@")[0] || "Account";
 
   // Global ⌘K / Ctrl+K to toggle the command palette.
   useEffect(() => {
@@ -22,15 +23,13 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const name = userEmail.split("@")[0] || "Account";
-
   return (
-    <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/70 backdrop-blur-2xl backdrop-saturate-150">
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-3 px-6 sm:px-10">
         <button
           type="button"
           onClick={() => setPaletteOpen(true)}
-          className="group flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-hairline bg-surface px-4 text-sm text-faint transition-colors hover:border-hairline-strong hover:text-muted sm:max-w-md"
+          className="glass-panel glass-interactive group flex h-10 min-w-0 flex-1 items-center gap-2.5 !rounded-xl px-4 text-sm text-faint hover:border-hairline-strong hover:text-muted sm:max-w-md"
         >
           <svg
             className="h-4 w-4 shrink-0"
@@ -55,9 +54,8 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
               type="button"
               aria-label="Notifications"
               onClick={() => setNotifOpen((v) => !v)}
-              className="relative grid h-10 w-10 place-items-center rounded-xl border border-hairline bg-surface text-muted transition-colors hover:text-ink"
+              className="glass-panel glass-interactive relative grid h-10 w-10 place-items-center !rounded-xl text-muted hover:text-ink"
             >
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-[color:var(--surface)]" />
               <svg
                 className="h-[18px] w-[18px]"
                 viewBox="0 0 24 24"
@@ -85,7 +83,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
           </div>
 
           <div
-            className="flex items-center gap-2.5 rounded-xl border border-hairline bg-surface py-1.5 pl-1.5 pr-3"
+            className="glass-panel flex items-center gap-2.5 !rounded-xl py-1.5 pl-1.5 pr-3"
             title={userEmail}
           >
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-ink">

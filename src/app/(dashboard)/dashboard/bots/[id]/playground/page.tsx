@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useRef, useState } from "react";
+import { Wrench, ThumbsUp, ThumbsDown, ShoppingBag } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -285,7 +286,7 @@ export default function PlaygroundPage({
       } catch {
         parsedArgs = {};
       }
-      push("tool", `🔧 ${call.name}`);
+      push("tool", call.name);
       const { result, nextCart } = runMockTool(call.name, parsedArgs, cartRef.current);
       cartRef.current = nextCart;
       results.push({ toolCallId: call.id, name: call.name, result });
@@ -380,7 +381,8 @@ export default function PlaygroundPage({
             if (item.role === "tool") {
               return (
                 <div key={item.id} className="flex justify-center">
-                  <span className="rounded-full bg-surface-2 px-3 py-1 text-[11px] font-medium text-faint">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-[11px] font-medium text-faint">
+                    <Wrench className="h-3 w-3" aria-hidden />
                     {item.content}
                   </span>
                 </div>
@@ -438,7 +440,7 @@ export default function PlaygroundPage({
                           : "text-faint hover:bg-surface-2 hover:text-muted"
                       )}
                     >
-                      👍
+                      <ThumbsUp className="h-3.5 w-3.5" aria-hidden />
                     </button>
                     <button
                       type="button"
@@ -452,7 +454,7 @@ export default function PlaygroundPage({
                           : "text-faint hover:bg-surface-2 hover:text-muted"
                       )}
                     >
-                      👎
+                      <ThumbsDown className="h-3.5 w-3.5" aria-hidden />
                     </button>
                   </div>
                 )}
@@ -513,7 +515,7 @@ function ProductCard({ product }: { product: Product }) {
         />
       ) : (
         <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-surface-2 text-faint">
-          🛍️
+          <ShoppingBag className="h-5 w-5" aria-hidden />
         </div>
       )}
       <div className="min-w-0 flex-1">

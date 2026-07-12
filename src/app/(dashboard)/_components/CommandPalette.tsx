@@ -119,7 +119,7 @@ export default function CommandPalette({
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
       />
       <div
-        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-hairline bg-surface shadow-[var(--shadow-lg)]"
+        className="glass-panel-strong relative w-full max-w-xl overflow-hidden"
         onKeyDown={onKeyDown}
       >
         <div className="flex items-center gap-3 border-b border-hairline px-4">

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Wrench } from "lucide-react";
 import { getConversationForOwner } from "@/lib/db/conversations";
 import type { ConversationStatus } from "@/lib/db/conversations";
 import { listBots } from "@/lib/db/bots";
@@ -88,7 +89,7 @@ function ToolCallChip({ call }: { call: ToolCall }) {
   const args = call.function?.arguments ?? "";
   return (
     <div className="mt-2 inline-flex max-w-full items-start gap-1.5 rounded-full bg-surface-2 px-3 py-1 font-mono text-xs text-muted">
-      <span aria-hidden>🔧</span>
+      <Wrench className="h-3 w-3 shrink-0 translate-y-[1px]" aria-hidden />
       <span className="break-all">
         {name}({args})
       </span>
