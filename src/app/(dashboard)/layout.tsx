@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { isAuthDisabled, devUserEmail } from "@/lib/auth/access";
 import SignOutButton from "./_components/SignOutButton";
 import NavLinks from "./_components/NavLinks";
 import TopBar from "./_components/TopBar";
@@ -11,17 +10,16 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const authDisabled = isAuthDisabled();
   const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && !authDisabled) {
+  if (!user) {
     redirect("/login");
   }
 
-  const email = user?.email ?? devUserEmail();
+  const email = user.email ?? "";
 
   return (
     <div className="flex min-h-screen bg-canvas text-ink">
@@ -58,11 +56,7 @@ export default async function DashboardLayout({
           <p className="mb-1 truncate px-3 text-xs text-sidebar-muted">
             {email}
           </p>
-          {authDisabled ? (
-            <p className="px-3 text-xs text-sidebar-muted">Auth disabled</p>
-          ) : (
-            <SignOutButton />
-          )}
+          <SignOutButton />
         </div>
       </aside>
 

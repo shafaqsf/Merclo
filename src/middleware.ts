@@ -1,15 +1,9 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { isAuthDisabled } from "@/lib/auth/access";
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 export async function middleware(request: NextRequest) {
-  // Auth switch: when disabled, let dashboard requests through untouched.
-  if (isAuthDisabled()) {
-    return NextResponse.next({ request });
-  }
-
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
