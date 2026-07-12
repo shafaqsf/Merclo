@@ -18,7 +18,7 @@ npx vitest run src/lib/db/bots.test.ts   # run a single test file
 npx tsc --noEmit     # typecheck only (build also does this)
 ```
 
-Environment: copy `.env.example` → `.env.local`. Needs Supabase keys, an OpenRouter API key, and `AGENT_MODEL`. Apply the numbered migrations in `supabase/migrations/` in order (SQL editor or `supabase db push`) to create the `bots` / `conversations` tables and their RLS policies.
+Environment: copy `.env.example` → `.env.local`. Needs Supabase keys, an OpenRouter API key, and `AGENT_MODEL`. Apply the single consolidated migration in `supabase/migrations/` (SQL editor or `supabase db push`) to create the full schema (tables, RLS policies, and the avatar storage bucket).
 
 ## Architecture
 
