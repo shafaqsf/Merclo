@@ -22,13 +22,15 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const name = userEmail.split("@")[0] || "Account";
+
   return (
     <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-6 sm:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-3 px-6 sm:px-10">
         <button
           type="button"
           onClick={() => setPaletteOpen(true)}
-          className="group flex h-9 min-w-0 flex-1 items-center gap-2.5 rounded-full border border-hairline bg-surface px-4 text-sm text-faint transition-colors hover:border-hairline-strong hover:text-muted sm:max-w-sm"
+          className="group flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-hairline bg-surface px-4 text-sm text-faint transition-colors hover:border-hairline-strong hover:text-muted sm:max-w-md"
         >
           <svg
             className="h-4 w-4 shrink-0"
@@ -41,20 +43,21 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" strokeLinecap="round" />
           </svg>
-          <span className="flex-1 text-left">Search…</span>
+          <span className="flex-1 text-left">Search for anything…</span>
           <kbd className="hidden shrink-0 rounded-md border border-hairline bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-faint sm:block">
             ⌘K
           </kbd>
         </button>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2.5">
           <div className="relative">
             <button
               type="button"
               aria-label="Notifications"
               onClick={() => setNotifOpen((v) => !v)}
-              className="grid h-9 w-9 place-items-center rounded-full border border-hairline bg-surface text-muted transition-colors hover:text-ink"
+              className="relative grid h-10 w-10 place-items-center rounded-xl border border-hairline bg-surface text-muted transition-colors hover:text-ink"
             >
+              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-danger ring-2 ring-[color:var(--surface)]" />
               <svg
                 className="h-[18px] w-[18px]"
                 viewBox="0 0 24 24"
@@ -82,11 +85,18 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
           </div>
 
           <div
-            className="grid h-9 w-9 place-items-center rounded-full bg-accent text-sm font-semibold text-accent-ink"
+            className="flex items-center gap-2.5 rounded-xl border border-hairline bg-surface py-1.5 pl-1.5 pr-3"
             title={userEmail}
-            aria-label={userEmail}
           >
-            {initial}
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-ink">
+              {initial}
+            </span>
+            <span className="hidden leading-tight sm:block">
+              <span className="block max-w-[10rem] truncate text-[13px] font-semibold capitalize text-ink">
+                {name}
+              </span>
+              <span className="block text-[11px] text-faint">Owner</span>
+            </span>
           </div>
         </div>
       </div>

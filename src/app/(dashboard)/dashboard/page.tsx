@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { StatCard } from "@/components/ui/StatCard";
 import { Badge } from "@/components/ui/Badge";
 import { Donut } from "@/components/ui/Donut";
+import { AreaChart } from "@/components/ui/AreaChart";
 
 function formatDay(date: string): { weekday: string; short: string } {
   const d = new Date(`${date}T00:00:00Z`);
@@ -51,13 +52,25 @@ const ICONS = {
 
 function Header() {
   return (
-    <div>
-      <h1 className="text-3xl font-semibold tracking-tight text-ink">
-        Welcome back
-      </h1>
-      <p className="mt-2 text-[15px] text-muted">
-        Here&apos;s what&apos;s happening across your bots and conversations.
-      </p>
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 className="text-[28px] font-semibold tracking-tight text-ink">
+          Welcome back 👋
+        </h1>
+        <p className="mt-1.5 text-[15px] text-muted">
+          Here&apos;s what&apos;s happening across your bots and conversations.
+        </p>
+      </div>
+      <div className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-surface px-3.5 py-2 text-sm font-medium text-ink shadow-[var(--shadow-sm)]">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-muted" aria-hidden>
+          <rect x="3" y="4" width="18" height="17" rx="2" />
+          <path d="M3 9h18M8 2v4M16 2v4" strokeLinecap="round" />
+        </svg>
+        Last 7 days
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-faint" aria-hidden>
+          <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
     </div>
   );
 }
@@ -67,42 +80,26 @@ function ConversationsChart({
 }: {
   data: DashboardStats["conversationsByDay"];
 }) {
-  const max = Math.max(1, ...data.map((d) => d.count));
+  const total = data.reduce((s, d) => s + d.count, 0);
+  const chartData = data.map((d) => ({
+    label: formatDay(d.date).weekday,
+    value: d.count,
+  }));
   return (
     <Card className="flex h-full flex-col">
-      <CardHeader>
-        <h3 className="text-sm font-semibold tracking-tight text-ink">
-          Conversations
-        </h3>
-        <p className="mt-0.5 text-xs text-faint">Last 7 days</p>
+      <CardHeader className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold tracking-tight text-ink">
+            Conversations over time
+          </h3>
+          <p className="mt-0.5 text-xs text-faint">Last 7 days</p>
+        </div>
+        <span className="text-2xl font-semibold tracking-tight text-ink">
+          {total.toLocaleString()}
+        </span>
       </CardHeader>
       <CardBody className="flex-1">
-        <div className="flex h-44 items-end gap-2.5">
-          {data.map((d) => {
-            const { weekday, short } = formatDay(d.date);
-            const heightPct = (d.count / max) * 100;
-            return (
-              <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
-                <span className="text-xs font-medium text-muted">{d.count}</span>
-                <div className="flex w-full flex-1 items-end rounded-md bg-surface-2">
-                  <div
-                    className="w-full rounded-t-md bg-accent transition-all duration-300"
-                    style={{
-                      height: `${heightPct}%`,
-                      minHeight: d.count > 0 ? "4px" : "2px",
-                    }}
-                    aria-hidden
-                  />
-                </div>
-                <span className="text-center text-[11px] leading-tight text-faint">
-                  {weekday}
-                  <br />
-                  {short}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        <AreaChart data={chartData} height={200} />
       </CardBody>
     </Card>
   );
@@ -243,11 +240,22 @@ function TopQuestions({ data }: { data: DashboardStats["topQuestions"] }) {
 }
 
 function QuickActions() {
-  const actions: { href: string; label: string }[] = [
-    { href: "/dashboard/bots/new", label: "New bot" },
-    { href: "/dashboard/conversations", label: "Conversations" },
-    { href: "/dashboard/analytics", label: "Analytics" },
-    { href: "/dashboard/settings", label: "Settings" },
+  const barsIcon = (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden>
+      <path d="M4 20V10M10 20V4M16 20v-8M22 20H2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  const gearIcon = (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" strokeLinecap="round" />
+    </svg>
+  );
+  const actions: { href: string; label: string; icon: React.ReactNode }[] = [
+    { href: "/dashboard/bots/new", label: "New bot", icon: ICONS.bot },
+    { href: "/dashboard/conversations", label: "Conversations", icon: ICONS.chat },
+    { href: "/dashboard/analytics", label: "Analytics", icon: barsIcon },
+    { href: "/dashboard/settings", label: "Settings", icon: gearIcon },
   ];
   return (
     <Card className="flex h-full flex-col">
@@ -257,19 +265,18 @@ function QuickActions() {
         </h3>
       </CardHeader>
       <CardBody className="flex-1">
-        <div className="grid gap-2.5">
-          <ButtonLink href={actions[0].href} variant="primary" size="md">
-            {actions[0].label}
-          </ButtonLink>
-          {actions.slice(1).map((a) => (
-            <ButtonLink
+        <div className="grid grid-cols-2 gap-3">
+          {actions.map((a) => (
+            <Link
               key={a.href}
               href={a.href}
-              variant="secondary"
-              size="md"
+              className="group flex flex-col items-center justify-center gap-2 rounded-xl border border-hairline bg-surface-2 px-3 py-5 text-center transition-colors hover:border-accent hover:bg-accent-soft"
             >
-              {a.label}
-            </ButtonLink>
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-surface text-accent shadow-[var(--shadow-sm)]">
+                {a.icon}
+              </span>
+              <span className="text-[13px] font-medium text-ink">{a.label}</span>
+            </Link>
           ))}
         </div>
       </CardBody>
@@ -350,22 +357,26 @@ export default async function DashboardPage() {
           value={stats.conversationCount.toLocaleString()}
           delta={delta(stats.conversationCount, stats.prev.conversationCount)}
           icon={ICONS.chat}
+          tone="blue"
         />
         <StatCard
           label="Active bots"
           value={stats.botCount.toLocaleString()}
           icon={ICONS.bot}
+          tone="purple"
         />
         <StatCard
           label="Messages"
           value={stats.messageCount.toLocaleString()}
           delta={delta(stats.messageCount, stats.prev.messageCount)}
           icon={ICONS.message}
+          tone="green"
         />
         <StatCard
           label="Cart adds"
           value={stats.cartAdds.toLocaleString()}
           icon={ICONS.cart}
+          tone="orange"
         />
       </div>
 
