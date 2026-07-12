@@ -90,7 +90,7 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-ink">
           Settings
         </h1>
-        <p className="mt-1.5 text-sm text-muted">
+        <p className="mt-1.5 text-sm text-foreground">
           Manage your profile, password, and account.
         </p>
       </header>
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           <h2 className="text-base font-semibold tracking-tight text-ink">
             Profile
           </h2>
-          <p className="mt-0.5 text-sm text-muted">
+          <p className="mt-0.5 text-sm text-foreground">
             The email address associated with your account.
           </p>
         </CardHeader>
@@ -114,7 +114,7 @@ export default function SettingsPage() {
                 {userError}
               </p>
             ) : (
-              <div className="w-full max-w-sm rounded-xl bg-surface-2 px-3.5 py-2.5 text-sm text-muted">
+              <div className="w-full max-w-sm rounded-xl bg-surface-2 px-3.5 py-2.5 text-sm text-foreground">
                 {email ?? "—"}
               </div>
             )}
@@ -128,7 +128,7 @@ export default function SettingsPage() {
           <h2 className="text-base font-semibold tracking-tight text-ink">
             Change password
           </h2>
-          <p className="mt-0.5 text-sm text-muted">
+          <p className="mt-0.5 text-sm text-foreground">
             Choose a new password of at least 8 characters.
           </p>
         </CardHeader>

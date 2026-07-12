@@ -73,7 +73,7 @@ export default function LoginPage() {
           <h1 className="text-[26px] font-semibold tracking-tight text-ink">
             {mode === "signin" ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="mt-1.5 text-[15px] text-muted">
+          <p className="mt-1.5 text-[15px] text-foreground">
             {mode === "signin"
               ? "Sign in to continue to Merclo."
               : "Start building embeddable shopping assistants."}
@@ -130,7 +130,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <div className="mt-6 text-center text-sm text-muted">
+        <div className="mt-6 text-center text-sm text-foreground">
           {mode === "signin" ? (
             <>
               Don&apos;t have an account?{" "}

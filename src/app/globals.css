@@ -27,7 +27,7 @@
   --secondary: #f4f4f5;
   --secondary-foreground: #0a0a0a;
   --muted: #f4f4f5;
-  --muted-foreground: #52525b;
+  --muted-foreground: #0a0a0a;
   --accent: #f4f4f5;
   --accent-foreground: #0a0a0a;
   --destructive: #e5484d;
@@ -61,7 +61,7 @@
   --surface-2: var(--muted);
   --elevated: var(--popover);
   --ink: var(--foreground);
-  --faint: #71717a;
+  --faint: #0a0a0a;
   --hairline: var(--border);
   --hairline-strong: #d4d4d8;
   --accent-hover: #262626;
@@ -159,6 +159,12 @@ body {
 
 ::selection {
   background: color-mix(in oklch, var(--foreground) 12%, transparent);
+}
+
+/* Placeholders stay a soft grey so empty fields don't read as pre-filled. */
+::placeholder {
+  color: #9ca3af !important;
+  opacity: 1;
 }
 
 /* Thin, unobtrusive scrollbars. */

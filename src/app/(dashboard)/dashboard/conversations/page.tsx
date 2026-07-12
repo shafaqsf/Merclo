@@ -45,7 +45,7 @@ export default async function ConversationsPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-ink">
           Conversations
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-sm text-foreground">
           Transcripts of chats between shoppers and your bots.
         </p>
       </div>
@@ -53,7 +53,7 @@ export default async function ConversationsPage() {
       {conversations.length === 0 ? (
         <Card>
           <CardBody className="py-16 text-center">
-            <p className="text-sm text-muted">
+            <p className="text-sm text-foreground">
               No conversations yet — they&apos;ll appear here once shoppers chat
               with your bots.
             </p>
@@ -75,15 +75,15 @@ export default async function ConversationsPage() {
                       </p>
                       <StatusBadge status={c.status} />
                     </div>
-                    <p className="mt-1 text-xs text-muted">
+                    <p className="mt-1 text-xs text-foreground">
                       {c.message_count} message
                       {c.message_count === 1 ? "" : "s"}
                       {" · "}Created {formatDate(c.created_at)}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-xs text-faint">Updated</p>
-                    <p className="text-sm text-muted">
+                    <p className="text-xs text-foreground">Updated</p>
+                    <p className="text-sm text-foreground">
                       {formatDate(c.updated_at)}
                     </p>
                   </div>

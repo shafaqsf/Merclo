@@ -30,7 +30,7 @@ export default async function AnalyticsPage() {
         <Header />
         <Card className="mt-8 p-8 text-center">
           <p className="text-sm font-medium text-ink">Analytics unavailable</p>
-          <p className="mt-1.5 text-sm text-muted">
+          <p className="mt-1.5 text-sm text-foreground">
             We couldn&apos;t load your analytics. Is the database migrated?
           </p>
         </Card>
@@ -67,7 +67,7 @@ export default async function AnalyticsPage() {
       {everythingZero ? (
         <Card className="mt-8 p-8 text-center">
           <p className="text-sm font-medium text-ink">No data yet</p>
-          <p className="mt-1.5 text-sm text-muted">
+          <p className="mt-1.5 text-sm text-foreground">
             Once your bots start handling conversations, insights will appear
             here.
           </p>
@@ -81,7 +81,7 @@ export default async function AnalyticsPage() {
               value={
                 <span className="flex items-baseline gap-2">
                   {csatValue}
-                  <span className="text-xs font-normal text-faint">
+                  <span className="text-xs font-normal text-foreground">
                     {csat.up} up · {csat.down} down
                   </span>
                 </span>
@@ -105,7 +105,7 @@ export default async function AnalyticsPage() {
             <Card className="p-6">
               <h2 className="text-sm font-semibold text-ink">Top questions</h2>
               {topQuestions.length === 0 ? (
-                <p className="mt-4 text-sm text-faint">No questions yet.</p>
+                <p className="mt-4 text-sm text-foreground">No questions yet.</p>
               ) : (
                 <ol className="mt-4 space-y-2.5">
                   {topQuestions.map((q, i) => (
@@ -114,7 +114,7 @@ export default async function AnalyticsPage() {
                       className="flex items-start justify-between gap-3"
                     >
                       <span className="flex min-w-0 items-start gap-2.5 text-sm text-ink">
-                        <span className="mt-0.5 w-4 shrink-0 text-right text-xs font-medium text-faint">
+                        <span className="mt-0.5 w-4 shrink-0 text-right text-xs font-medium text-foreground">
                           {i + 1}
                         </span>
                         <span className="truncate">{q.question}</span>
@@ -133,11 +133,11 @@ export default async function AnalyticsPage() {
               </h2>
               <p className="mt-4 text-2xl font-semibold tracking-tight text-ink">
                 {csat.down}{" "}
-                <span className="text-base font-normal text-muted">
+                <span className="text-base font-normal text-foreground">
                   {csat.down === 1 ? "reply" : "replies"} rated not helpful
                 </span>
               </p>
-              <p className="mt-2 text-xs text-faint">
+              <p className="mt-2 text-xs text-foreground">
                 A dedicated unanswered-questions view is coming. For now this is
                 the count of thumbs-down feedback across your bots — a good
                 signal of where replies fell short.
@@ -148,14 +148,14 @@ export default async function AnalyticsPage() {
             <Card className="p-6">
               <h2 className="text-sm font-semibold text-ink">Tool usage</h2>
               {toolUsage.length === 0 ? (
-                <p className="mt-4 text-sm text-faint">No tool calls yet.</p>
+                <p className="mt-4 text-sm text-foreground">No tool calls yet.</p>
               ) : (
                 <ul className="mt-4 space-y-3">
                   {toolUsage.map((t) => (
                     <li key={t.name}>
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-medium text-ink">{t.name}</span>
-                        <span className="text-faint">{t.count}</span>
+                        <span className="text-foreground">{t.count}</span>
                       </div>
                       <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
                         <div
@@ -179,7 +179,7 @@ export default async function AnalyticsPage() {
                 Most active bots
               </h2>
               {perBot.length === 0 ? (
-                <p className="mt-4 text-sm text-faint">No bots yet.</p>
+                <p className="mt-4 text-sm text-foreground">No bots yet.</p>
               ) : (
                 <ul className="mt-4 space-y-1">
                   {perBot.map((b) => (
@@ -211,7 +211,7 @@ function Header() {
       <h1 className="text-3xl font-semibold tracking-tight text-ink">
         Analytics
       </h1>
-      <p className="mt-1.5 text-sm text-muted">
+      <p className="mt-1.5 text-sm text-foreground">
         How your bots are performing over the last 7 days.
       </p>
     </div>

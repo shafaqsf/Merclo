@@ -64,9 +64,6 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
             <path d="m20 20-3.5-3.5" strokeLinecap="round" />
           </svg>
           <span className="flex-1 text-left">Search for anything…</span>
-          <kbd className="hidden shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground sm:block">
-            ⌘K
-          </kbd>
         </Button>
 
         <div className="ml-auto flex items-center gap-2.5">

@@ -13,7 +13,7 @@ export default function DocsPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-ink">
           How Merclo works
         </h1>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-foreground">
           Merclo puts an AI shopping assistant inside your storefront. This
           page explains what it does for your shoppers, and how to get one
           running.
@@ -34,7 +34,7 @@ export default function DocsPage() {
                 <h3 className="text-[15px] font-semibold text-ink">
                   {card.title}
                 </h3>
-                <p className="text-[13px] leading-relaxed text-muted">
+                <p className="text-[13px] leading-relaxed text-foreground">
                   {card.description}
                 </p>
               </CardBody>
@@ -60,7 +60,7 @@ export default function DocsPage() {
                       <h3 className="text-[15px] font-semibold text-ink">
                         {step.title}
                       </h3>
-                      <p className="text-[13px] leading-relaxed text-muted">
+                      <p className="text-[13px] leading-relaxed text-foreground">
                         {step.description}
                       </p>
                     </div>
@@ -86,7 +86,7 @@ export default function DocsPage() {
             <h3 className="text-[15px] font-semibold text-ink">
               Prefer a guided setup?
             </h3>
-            <p className="text-[13px] leading-relaxed text-muted">
+            <p className="text-[13px] leading-relaxed text-foreground">
               The onboarding wizard walks you through creating your first bot,
               installing the widget, and trying it out — all in one flow.
             </p>

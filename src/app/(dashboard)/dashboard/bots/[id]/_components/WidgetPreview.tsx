@@ -126,7 +126,7 @@ export function WidgetPreview({
       className="sticky top-8"
       style={vars as CSSProperties}
     >
-      <p className="mb-3 text-xs font-medium uppercase tracking-wide text-faint">
+      <p className="mb-3 text-xs font-medium uppercase tracking-wide text-foreground">
         Live preview
       </p>
       <div className="relative overflow-hidden rounded-2xl border border-hairline bg-canvas p-5">
@@ -195,7 +195,7 @@ export function WidgetPreview({
                 <div
                   className={`mt-1 w-[75%] self-start overflow-hidden ${msgRadius} border border-hairline bg-surface`}
                 >
-                  <div className="flex h-24 items-center justify-center bg-surface-2 text-faint">
+                  <div className="flex h-24 items-center justify-center bg-surface-2 text-foreground">
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -212,7 +212,7 @@ export function WidgetPreview({
                     <p className="text-[13px] font-medium text-ink">
                       Sample product
                     </p>
-                    <p className="text-[12px] text-muted">$49.00</p>
+                    <p className="text-[12px] text-foreground">$49.00</p>
                     <span
                       className="inline-block rounded-full px-3 py-1 text-[12px] font-medium text-white"
                       style={{ background: accent }}
@@ -228,7 +228,7 @@ export function WidgetPreview({
             <div
               className={`flex items-center gap-2 border-t border-hairline bg-surface ${composerPadding}`}
             >
-              <div className="flex-1 rounded-full border border-hairline bg-surface-2 px-3.5 py-2 text-[13px] text-faint">
+              <div className="flex-1 rounded-full border border-hairline bg-surface-2 px-3.5 py-2 text-[13px] text-foreground">
                 Message…
               </div>
               <span

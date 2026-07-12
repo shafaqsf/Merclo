@@ -88,7 +88,7 @@ function ToolCallChip({ call }: { call: ToolCall }) {
   const name = call.function?.name ?? call.name ?? "unknown";
   const args = call.function?.arguments ?? "";
   return (
-    <div className="mt-2 inline-flex max-w-full items-start gap-1.5 rounded-full bg-surface-2 px-3 py-1 font-mono text-xs text-muted">
+    <div className="mt-2 inline-flex max-w-full items-start gap-1.5 rounded-full bg-surface-2 px-3 py-1 font-mono text-xs text-foreground">
       <Wrench className="h-3 w-3 shrink-0 translate-y-[1px]" aria-hidden />
       <span className="break-all">
         {name}({args})
@@ -106,11 +106,11 @@ function MessageBlock({ raw }: { raw: unknown }) {
   if (role === "system") {
     return (
       <div className="text-center">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-faint">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-foreground">
           System
         </span>
         {text && (
-          <p className="mt-1 whitespace-pre-wrap text-xs text-muted">{text}</p>
+          <p className="mt-1 whitespace-pre-wrap text-xs text-foreground">{text}</p>
         )}
       </div>
     );
@@ -130,10 +130,10 @@ function MessageBlock({ raw }: { raw: unknown }) {
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%]">
-          <p className="mb-1 text-xs text-faint">
+          <p className="mb-1 text-xs text-foreground">
             ↳ result{msg.name ? ` · ${msg.name}` : ""}
           </p>
-          <pre className="overflow-x-auto rounded-lg bg-surface-2 px-3 py-2 font-mono text-xs text-muted">
+          <pre className="overflow-x-auto rounded-lg bg-surface-2 px-3 py-2 font-mono text-xs text-foreground">
             <code>{prettyJson(msg.content)}</code>
           </pre>
         </div>
@@ -163,8 +163,8 @@ function MessageBlock({ raw }: { raw: unknown }) {
   // Unknown shape — render defensively.
   return (
     <div className="rounded-xl border border-hairline bg-surface-2 px-3 py-2">
-      <p className="mb-1 text-xs text-faint">{role ?? "unknown"}</p>
-      <pre className="overflow-x-auto font-mono text-xs text-muted">
+      <p className="mb-1 text-xs text-foreground">{role ?? "unknown"}</p>
+      <pre className="overflow-x-auto font-mono text-xs text-foreground">
         <code>{prettyJson(raw)}</code>
       </pre>
     </div>
@@ -198,7 +198,7 @@ export default async function ConversationPage({
                   {STATUS_LABELS[conversation.status]}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted">
+              <p className="mt-2 text-xs text-foreground">
                 Created {formatDate(conversation.created_at)} · Updated{" "}
                 {formatDate(conversation.updated_at)}
               </p>
@@ -217,7 +217,7 @@ export default async function ConversationPage({
 
       <div className="mt-6 space-y-3">
         {conversation.messages.length === 0 ? (
-          <p className="py-12 text-center text-sm text-muted">
+          <p className="py-12 text-center text-sm text-foreground">
             No messages in this conversation.
           </p>
         ) : (

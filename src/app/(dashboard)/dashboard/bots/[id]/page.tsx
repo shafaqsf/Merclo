@@ -123,7 +123,7 @@ export default function EditBotPage({
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-6 py-12 text-sm text-muted">
+      <div className="mx-auto w-full max-w-2xl px-6 py-12 text-sm text-foreground">
         Loading…
       </div>
     );
@@ -133,7 +133,7 @@ export default function EditBotPage({
     <div className="mx-auto w-full max-w-2xl px-6 py-12">
       <Link
         href="/dashboard/bots"
-        className="text-sm text-muted transition-colors hover:text-ink"
+        className="text-sm text-foreground transition-colors hover:text-ink"
       >
         &larr; Back to bots
       </Link>
@@ -195,7 +195,7 @@ export default function EditBotPage({
         <Card>
           <CardHeader>
             <h2 className="text-sm font-medium text-ink">Allowed tools</h2>
-            <p className="mt-0.5 text-xs text-muted">
+            <p className="mt-0.5 text-xs text-foreground">
               Choose which actions this assistant can perform.
             </p>
           </CardHeader>
@@ -227,7 +227,7 @@ export default function EditBotPage({
                           <Badge variant="outline">mutating</Badge>
                         )}
                       </span>
-                      <span className="mt-1 block text-xs text-muted">
+                      <span className="mt-1 block text-xs text-foreground">
                         {def.description}
                       </span>
                     </span>
@@ -256,7 +256,7 @@ export default function EditBotPage({
       <Card className="mt-12">
         <CardHeader>
           <h2 className="text-sm font-medium text-ink">Embed snippet</h2>
-          <p className="mt-0.5 text-xs text-muted">
+          <p className="mt-0.5 text-xs text-foreground">
             Paste this into your Shopify theme (e.g. before{" "}
             <code>&lt;/body&gt;</code> in <code>theme.liquid</code>).
           </p>
