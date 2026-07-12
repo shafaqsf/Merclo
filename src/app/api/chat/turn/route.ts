@@ -179,7 +179,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
     return json(
-      { type: "message", conversationId, content: result.content },
+      {
+        type: "message",
+        conversationId,
+        content: result.content,
+        ...(result.products ? { products: result.products } : {}),
+      },
       200,
       origin
     );

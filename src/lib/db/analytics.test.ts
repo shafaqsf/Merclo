@@ -13,6 +13,7 @@ function bot(id: string, name: string): Bot {
     persona: "",
     allowed_tools: [],
     allowed_origins: [],
+    appearance: {},
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
   };

@@ -32,6 +32,7 @@ describe("mapRowToBot", () => {
       persona: "helpful",
       allowed_tools: ["search_products"],
       allowed_origins: ["https://shop.com"],
+      appearance: { accent: "#ff0000" },
       created_at: "2026-01-01T00:00:00Z",
       updated_at: "2026-01-02T00:00:00Z",
     });
@@ -42,6 +43,7 @@ describe("mapRowToBot", () => {
       persona: "helpful",
       allowed_tools: ["search_products"],
       allowed_origins: ["https://shop.com"],
+      appearance: { accent: "#ff0000" },
       created_at: "2026-01-01T00:00:00Z",
       updated_at: "2026-01-02T00:00:00Z",
     });
@@ -58,6 +60,7 @@ describe("mapRowToBot", () => {
     expect(bot.persona).toBe("");
     expect(bot.allowed_tools).toEqual([]);
     expect(bot.allowed_origins).toEqual([]);
+    expect(bot.appearance).toEqual({});
   });
 
   it("coerces non-string array entries to strings", () => {

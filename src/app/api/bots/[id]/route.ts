@@ -28,6 +28,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     persona?: string;
     allowed_tools?: string[];
     allowed_origins?: string[];
+    appearance?: Record<string, unknown>;
   } = {};
 
   if (typeof data.name === "string") {
@@ -43,6 +44,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
   if (Array.isArray(data.allowed_origins)) {
     patch.allowed_origins = data.allowed_origins as string[];
+  }
+  if (data.appearance && typeof data.appearance === "object") {
+    patch.appearance = data.appearance as Record<string, unknown>;
   }
 
   const bot = await updateBot(id, patch);

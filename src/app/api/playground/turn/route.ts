@@ -127,6 +127,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       type: "message",
       conversationId,
       content: result.content,
+      ...(result.products ? { products: result.products } : {}),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal error.";

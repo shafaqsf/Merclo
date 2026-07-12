@@ -11,6 +11,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Field } from "@/components/ui/Field";
 import { Badge } from "@/components/ui/Badge";
+import { BotTabs } from "./_components/BotTabs";
 import { cn } from "@/lib/cn";
 
 const APP_URL =
@@ -146,6 +147,10 @@ export default function EditBotPage({
         >
           Test in playground
         </ButtonLink>
+      </div>
+
+      <div className="mt-6">
+        <BotTabs botId={id} active="settings" />
       </div>
 
       <form onSubmit={handleSave} className="mt-8 space-y-6">

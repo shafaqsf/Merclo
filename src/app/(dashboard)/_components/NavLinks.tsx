@@ -4,12 +4,71 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-const LINKS = [
-  { href: "/dashboard", label: "Overview", exact: true },
-  { href: "/dashboard/bots", label: "Bots" },
-  { href: "/dashboard/conversations", label: "Conversations" },
-  { href: "/dashboard/settings", label: "Settings" },
-];
+type IconName = "overview" | "bots" | "conversations" | "analytics" | "settings";
+
+const LINKS: { href: string; label: string; icon: IconName; exact?: boolean }[] =
+  [
+    { href: "/dashboard", label: "Overview", icon: "overview", exact: true },
+    { href: "/dashboard/bots", label: "Bots", icon: "bots" },
+    {
+      href: "/dashboard/conversations",
+      label: "Conversations",
+      icon: "conversations",
+    },
+    { href: "/dashboard/analytics", label: "Analytics", icon: "analytics" },
+    { href: "/dashboard/settings", label: "Settings", icon: "settings" },
+  ];
+
+function Icon({ name }: { name: IconName }) {
+  const common = {
+    className: "h-[18px] w-[18px] shrink-0",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+  switch (name) {
+    case "overview":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="7" height="9" rx="1.5" />
+          <rect x="14" y="3" width="7" height="5" rx="1.5" />
+          <rect x="14" y="12" width="7" height="9" rx="1.5" />
+          <rect x="3" y="16" width="7" height="5" rx="1.5" />
+        </svg>
+      );
+    case "bots":
+      return (
+        <svg {...common}>
+          <rect x="4" y="8" width="16" height="11" rx="3" />
+          <path d="M12 8V4M9 13h.01M15 13h.01" />
+        </svg>
+      );
+    case "conversations":
+      return (
+        <svg {...common}>
+          <path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z" />
+        </svg>
+      );
+    case "analytics":
+      return (
+        <svg {...common}>
+          <path d="M3 3v18h18" />
+          <path d="M7 14l3-3 3 3 5-6" />
+        </svg>
+      );
+    case "settings":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      );
+  }
+}
 
 export default function NavLinks() {
   const pathname = usePathname();
@@ -25,12 +84,13 @@ export default function NavLinks() {
             key={link.href}
             href={link.href}
             className={cn(
-              "block rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
               active
-                ? "bg-surface text-ink shadow-[var(--shadow-sm)]"
-                : "text-muted hover:bg-surface/60 hover:text-ink"
+                ? "bg-sidebar-surface text-sidebar-ink"
+                : "text-sidebar-muted hover:bg-sidebar-surface/60 hover:text-sidebar-ink"
             )}
           >
+            <Icon name={link.icon} />
             {link.label}
           </Link>
         );
