@@ -35,7 +35,19 @@ export default async function DashboardLayout({
 
         <NavLinks />
 
-        <div className="px-4 pb-4">
+        <div className="mt-auto space-y-3 px-4 pb-4">
+          <div className="rounded-2xl bg-gradient-to-br from-accent to-[color:#6f5bff] p-4 text-white">
+            <p className="text-sm font-semibold">Upgrade to Pro</p>
+            <p className="mt-1 text-xs leading-relaxed text-white/80">
+              Unlock more bots, higher limits, and priority support.
+            </p>
+            <Link
+              href="/dashboard/settings"
+              className="mt-3 inline-flex rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur transition-colors hover:bg-white/25"
+            >
+              Upgrade now
+            </Link>
+          </div>
           <div className="rounded-2xl border border-sidebar-hairline bg-sidebar-surface p-4">
             <p className="text-sm font-semibold text-sidebar-ink">Need help?</p>
             <p className="mt-1 text-xs leading-relaxed text-sidebar-muted">
@@ -61,7 +73,7 @@ export default async function DashboardLayout({
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar userEmail={user.email ?? ""} />
         <main className="flex-1">
-          <div className="mx-auto w-full max-w-6xl px-6 py-10 sm:px-8">
+          <div className="mx-auto w-full max-w-[1600px] px-6 py-8 sm:px-10">
             {children}
           </div>
         </main>
